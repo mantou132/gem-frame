@@ -1,0 +1,9 @@
+/node_modules/
+
+# Compiler output
+/build/
+
+.DS_Store
+logs
+*.log
+npm-debug.log*
