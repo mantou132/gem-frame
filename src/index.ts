@@ -1,22 +1,54 @@
 import { html, GemElement } from '@mantou/gem';
+import Realm from 'realms-shim';
 
-import '@mantou/gem/elements/route';
-import '@mantou/gem/elements/title';
-import './elements/nav';
-import routes from './routes';
+class GemFrame extends GemElement {
+  /**@attr */ src: string;
+  /**@attr */ tag: string;
+  static observedAttributes = ['src', 'tag'];
 
-class App extends GemElement {
+  fetchScript = async () => {
+    if (customElements.get(this.tag)) return;
+    const res = await fetch(this.src);
+    const text = await res.text();
+    const r = Realm.makeRootRealm();
+    r.global.console = console;
+    r.global.document = document;
+    r.global.window = window;
+    r.global.HTMLElement = HTMLElement;
+    r.global.customElements = customElements;
+    console.log({ text });
+    r.evaluate('console.log("test")');
+    r.evaluate(`
+    customElements.define('app-a-root', class extends HTMLElement {
+      constructor() {
+        super();
+        const shadow = this.attachShadow({mode: 'open'});
+        shadow.append('123')
+      }
+    });
+    `);
+    // https://github.com/Agoric/realms-shim/issues/46
+    // r.evaluate(text);
+  };
+
+  mounted() {
+    this.shadowRoot.append(document.createElement(this.tag));
+    this.fetchScript();
+  }
   render() {
     return html`
       <style>
-        app-nav {
-          margin-top: 5em;
+        :host {
+          display: contents;
         }
       </style>
-      <app-nav></app-nav>
-      <gem-route .routes=${routes}></gem-route>
     `;
+  }
+  attributeChanged(name: string) {
+    if (name === 'src') {
+      this.fetchScript();
+    }
   }
 }
 
-customElements.define('app-root', App);
+customElements.define('gem-frame', GemFrame);
