@@ -14,21 +14,12 @@ class GemFrame extends GemElement {
     r.global.console = console;
     r.global.document = document;
     r.global.window = window;
+    r.global.navigator = navigator;
     r.global.HTMLElement = HTMLElement;
     r.global.customElements = customElements;
-    console.log({ text });
-    r.evaluate('console.log("test")');
-    r.evaluate(`
-    customElements.define('app-a-root', class extends HTMLElement {
-      constructor() {
-        super();
-        const shadow = this.attachShadow({mode: 'open'});
-        shadow.append('123')
-      }
-    });
-    `);
-    // https://github.com/Agoric/realms-shim/issues/46
-    // r.evaluate(text);
+    r.global.URLSearchParams = URLSearchParams;
+    r.global.CustomEvent = CustomEvent;
+    r.evaluate(text);
   };
 
   mounted() {
