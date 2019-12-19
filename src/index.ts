@@ -30,7 +30,7 @@ export default class GemFrame extends GemElement {
       // webpack manifest
       // 相对路径可能有问题
       const manifest = await (await fetch(`${src}?t=${Date.now()}`)).json();
-      src = new URL(manifest.main || manifest.index, src).toString();
+      src = new URL(manifest.main || manifest.index, new URL(src, location.origin)).toString();
     } else if (this.src.endsWith('.js')) {
       // 不能自动更新
       src = this.src;
@@ -41,7 +41,7 @@ export default class GemFrame extends GemElement {
       doc = parse.parseFromString(text, 'text/html');
       const script: HTMLScriptElement = doc.querySelector('script[src]');
       const { pathname, search } = new URL(script.src);
-      src = new URL(`${pathname}${search}`, src).toString();
+      src = new URL(`${pathname}${search}`, new URL(src, location.origin)).toString();
     }
     if (!src) return; // 静默失败
     const text = await (await fetch(src)).text();

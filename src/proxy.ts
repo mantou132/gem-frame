@@ -27,8 +27,10 @@ function generateProxy(target: any, name: string, allowRead: object, allowWrite:
   });
 }
 
-export function setProxy(realm: any, rootElement: GemElement, doc?: Document) {
+export function setProxy(realm: any, rootElement: GemElement, doc = new Document()) {
   const allowReadDocument = {
+    body: doc.body,
+
     // <gem-title>
     get title() {
       return document.title;
@@ -36,8 +38,8 @@ export function setProxy(realm: any, rootElement: GemElement, doc?: Document) {
     head: document.head,
 
     // <gem-use>
-    querySelector: doc && doc.querySelector.bind(doc),
-    querySelectorAll: doc && doc.querySelectorAll.bind(doc),
+    querySelector: doc.querySelector.bind(doc),
+    querySelectorAll: doc.querySelectorAll.bind(doc),
 
     // lit-html
     createElement: document.createElement.bind(document),
@@ -87,6 +89,7 @@ export function setProxy(realm: any, rootElement: GemElement, doc?: Document) {
     URLSearchParams,
     navigator,
     // gem
+    Image,
     HTMLElement,
     customElements,
     CustomEvent,
