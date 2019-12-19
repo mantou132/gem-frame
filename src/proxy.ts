@@ -6,6 +6,8 @@
  */
 import { GemElement } from '@mantou/gem/lib/element';
 
+import GemFrame from './index';
+
 function generateProxy(target: any, name: string, allowRead: object, allowWrite: object) {
   return new Proxy(target, {
     get(_, prop) {
@@ -20,16 +22,46 @@ function generateProxy(target: any, name: string, allowRead: object, allowWrite:
       if (allowWrite[prop]) {
         target[prop] = value;
       } else {
-        console.warn(`Write forbidden property: \`${name}.${String(prop)}\``);
+        console.warn(`Write forbidden property: \`${name}.${String(prop)}\`, ${value}`);
       }
       return true;
     },
   });
 }
 
-export function setProxy(realm: any, rootElement: GemElement, doc = new Document()) {
+export function setProxy(rootElement: GemElement, doc = new Document()) {
   const allowReadDocument = {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Document
     body: doc.body,
+    documentElement: doc.documentElement,
+    get cookie() {
+      return document.cookie;
+    },
+    get hidden() {
+      return document.hidden;
+    },
+    get domain() {
+      return document.domain;
+    },
+    get referrer() {
+      return document.referrer;
+    },
+    location,
+    get getSelection() {
+      return rootElement.shadowRoot.getSelection;
+    },
+    get elementFromPoint() {
+      return rootElement.shadowRoot.elementFromPoint;
+    },
+    get elementsFromPoint() {
+      return rootElement.shadowRoot.elementsFromPoint;
+    },
+    get caretRangeFromPoint() {
+      return rootElement.shadowRoot.caretRangeFromPoint;
+    },
+    get caretPositionFromPoint() {
+      return rootElement.shadowRoot.caretPositionFromPoint;
+    },
 
     // <gem-title>
     get title() {
@@ -42,7 +74,23 @@ export function setProxy(realm: any, rootElement: GemElement, doc = new Document
     querySelectorAll: doc.querySelectorAll.bind(doc),
 
     // lit-html
-    createElement: document.createElement.bind(document),
+    // lit-html 创建的 script 解析在 template 中，不会执行
+    createElement(tag: string) {
+      if (tag === 'script') {
+        // 用于 webpack 的动态模块
+        const script = doc.createElement('script');
+        Object.defineProperty(script, 'src', {
+          set(value) {
+            const gemframe = new GemFrame();
+            gemframe.src = value;
+            gemframe.fetchScript();
+            return true;
+          },
+        });
+        return script;
+      }
+      return document.createElement(tag);
+    },
     createComment: document.createComment.bind(document),
     createTextNode: document.createTextNode.bind(document),
     createTreeWalker: document.createTreeWalker.bind(document),
@@ -70,33 +118,76 @@ export function setProxy(realm: any, rootElement: GemElement, doc = new Document
   };
 
   const allowWriteDocument = {
+    cookie: true,
     // <gem-title>
     title: true,
   };
 
   const allowReadWindow = {
+    // webpack
+    get webpackJsonp() {
+      return window['webpackJsonp'];
+    },
     // common
     get name() {
       return window.name;
     },
     console,
+    caches,
     Headers,
     Response,
     Request,
-    fetch,
     XMLHttpRequest,
     URL,
     URLSearchParams,
     navigator,
+    devicePixelRatio,
+    DOMMatrix,
+    DOMMatrixReadOnly,
+    DOMPoint,
+    DOMPointReadOnly,
+    DOMQuad,
+    DOMRect,
+    DOMRectReadOnly,
+    get innerHeight() {
+      return rootElement.clientHeight;
+    },
+    get innerWidth() {
+      return rootElement.clientWidth;
+    },
+    isSecureContext,
+    performance,
+    screen,
+    visualViewport: window['visualViewport'],
+    // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope#Methods
+    atob: atob.bind(window),
+    btoa: btoa.bind(window),
+    fetch: fetch.bind(window),
+    createImageBitmap: createImageBitmap.bind(window),
+    setTimeout: setTimeout.bind(window),
+    clearTimeout: clearTimeout.bind(window),
+    setInterval: setInterval.bind(window),
+    clearInterval: clearInterval.bind(window),
+    queueMicrotask: queueMicrotask.bind(window),
+    // https://developer.mozilla.org/en-US/docs/Web/API/Window#Methods
+    alert: alert.bind(window),
+    confirm: confirm.bind(window),
+    requestAnimationFrame: requestAnimationFrame.bind(window),
+    cancelAnimationFrame: cancelAnimationFrame.bind(window),
+    getComputedStyle: getComputedStyle.bind(window),
+    getSelection: getSelection.bind(window),
+    matchMedia: matchMedia.bind(window),
+    open: open.bind(window),
+    postMessage: postMessage.bind(window),
+    prompt: prompt.bind(window),
     // gem
     Image,
+    DOMParser,
     HTMLElement,
     customElements,
     CustomEvent,
     Node,
-    requestAnimationFrame: window.requestAnimationFrame.bind(window),
-    queueMicrotask: window.queueMicrotask.bind(window),
-    location: window.location,
+    location,
     localStorage,
     sessionStorage,
     history,
@@ -127,15 +218,18 @@ export function setProxy(realm: any, rootElement: GemElement, doc = new Document
   };
 
   const allowWriteWindow = {
+    webpackJsonp: true,
     name: true,
     __gemHistory: true,
     __litHtml: true,
     litHtmlVersions: true,
   };
 
-  Object.assign(realm.global, {
-    ...allowReadWindow,
+  const global = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
+  return Object.assign(allowReadWindow, {
     document: generateProxy(document, 'document', allowReadDocument, allowWriteDocument),
-    window: generateProxy(window, 'window', allowReadWindow, allowWriteWindow),
+    window: global,
+    globalThis: global,
+    self: global,
   });
 }

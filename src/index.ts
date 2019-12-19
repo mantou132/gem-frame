@@ -24,17 +24,19 @@ export default class GemFrame extends GemElement {
     return !this.tag;
   }
 
-  private async fetchScript() {
+  async fetchScript() {
     if (!this.src) return;
     if (fetchedScript.has(this.src)) return;
     let src = this.src.startsWith('//') ? `${location.protocol}${this.src}` : this.src;
     let doc: Document;
-    if (src.endsWith('.json')) {
+    const url = new URL(src, location.origin);
+    if (url.pathname.endsWith('.json')) {
       // webpack manifest
+      // 假设第一个字段就是 output
       // 相对路径可能有问题
       const manifest = await (await fetch(`${src}?t=${Date.now()}`)).json();
-      src = new URL(manifest.main || manifest.index, new URL(src, location.origin)).toString();
-    } else if (this.src.endsWith('.js')) {
+      src = new URL(manifest[Object.keys(manifest)[0]], url).toString();
+    } else if (url.pathname.endsWith('.js')) {
       // 不能自动更新
       src = this.src;
     } else {
@@ -44,14 +46,12 @@ export default class GemFrame extends GemElement {
       doc = parse.parseFromString(text, 'text/html');
       const script: HTMLScriptElement = doc.querySelector('script[src]');
       const { pathname, search } = new URL(script.src);
-      src = new URL(`${pathname}${search}`, new URL(src, location.origin)).toString();
+      src = new URL(`${pathname}${search}`, url).toString();
     }
     if (!src) return; // 静默失败
     const text = await (await fetch(src)).text();
     const r = Realm.makeRootRealm();
-    // 设置代理对象
-    setProxy(r, this.element, doc);
-    r.evaluate(text);
+    r.evaluate(text, setProxy(this.element, doc));
     fetchedScript.add(this.src);
   }
 
