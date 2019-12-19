@@ -1,9 +1,11 @@
-import { html, GemElement, attribute, customElement, connectStore, history } from '@mantou/gem';
+import { html, GemElement, attribute, property, customElement, connectStore, history } from '@mantou/gem';
 import Realm from 'realms-shim';
 
 import { setProxy } from './proxy';
 
 const fetchedScript = new Set();
+
+type FrameElement = GemElement & { [index: string]: any };
 
 /**
  * @attr src
@@ -14,8 +16,9 @@ const fetchedScript = new Set();
 export default class GemFrame extends GemElement {
   @attribute src: string;
   @attribute tag: string;
+  @property data: any;
 
-  private element: GemElement;
+  private element: FrameElement;
 
   get useIFrame() {
     return !this.tag;
@@ -53,10 +56,9 @@ export default class GemFrame extends GemElement {
   }
 
   private appendElement() {
-    if (this.element) {
-      this.element.remove();
-    }
-    this.element = document.createElement(this.tag) as GemElement;
+    if (this.element) this.element.remove();
+    this.element = document.createElement(this.tag) as FrameElement;
+    this.element.data = this.data;
     this.shadowRoot.append(this.element);
   }
 
@@ -94,5 +96,8 @@ export default class GemFrame extends GemElement {
     if (name === 'tag') {
       this.appendElement();
     }
+  }
+  propertyChanged(name: string, _oldValue: any, value: any) {
+    if (this.element) this.element[name] = value;
   }
 }
