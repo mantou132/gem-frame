@@ -1,20 +1,27 @@
-import { html, GemElement } from '@mantou/gem/lib/element';
+import { html, GemElement, attribute, customElement, connectStore, history } from '@mantou/gem';
 import Realm from 'realms-shim';
 
 import { setProxy } from './proxy';
 
 const fetchedScript = new Set();
 
-class GemFrame extends GemElement {
-  /**@attr */ src: string;
-  /**@attr */ tag: string;
-  static observedAttributes = ['src', 'tag'];
+/**
+ * @attr src
+ * @attr tag
+ */
+@customElement('gem-frame')
+@connectStore(history.historyState)
+export default class GemFrame extends GemElement {
+  @attribute src: string;
+  @attribute tag: string;
+
+  private element: GemElement;
 
   get useIFrame() {
     return !this.tag;
   }
 
-  fetchScript = async () => {
+  private async fetchScript() {
     if (!this.src) return;
     if (fetchedScript.has(this.src)) return;
     let src = this.src.startsWith('//') ? `${location.protocol}${this.src}` : this.src;
@@ -43,12 +50,9 @@ class GemFrame extends GemElement {
     setProxy(r, this.element, doc);
     r.evaluate(text);
     fetchedScript.add(this.src);
-  };
+  }
 
-  element: GemElement;
-  svg: HTMLOrSVGElement; // icon
-
-  appendElement() {
+  private appendElement() {
     if (this.element) {
       this.element.remove();
     }
@@ -92,5 +96,3 @@ class GemFrame extends GemElement {
     }
   }
 }
-
-customElements.define('gem-frame', GemFrame);
