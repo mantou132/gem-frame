@@ -1,12 +1,10 @@
 import { html, GemElement } from '@mantou/gem/lib/element';
-import { attribute, property, customElement, emitter } from '@mantou/gem/lib/decorators';
+import { attribute, customElement, emitter } from '@mantou/gem/lib/decorators';
 import Realm from 'realms-shim';
 
 import { setProxy } from './proxy';
 
 const fetchedScript = new Set();
-
-type AppElement = GemElement & { data: object };
 
 /**
  * @attr src
@@ -19,12 +17,10 @@ export default class GemFrame extends GemElement {
   @attribute src: string;
   // 自定义元素 tagName
   @attribute tag: string;
-  // 传递一个对象到子 App
-  @property data: object = {};
   // 加载执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
 
-  private app: AppElement;
+  private app: GemFrame;
 
   get useIFrame() {
     return !this.tag;
@@ -68,10 +64,9 @@ export default class GemFrame extends GemElement {
 
   private appendElement() {
     if (this.app) this.app.remove();
-    this.app = document.createElement(this.tag) as AppElement;
+    this.app = document.createElement(this.tag) as GemFrame;
     // 错误传播
     this.app.onerror = (err: CustomEvent) => this.error(err.detail);
-    this.app.data = this.data;
     this.shadowRoot.append(this.app);
   }
 
@@ -124,9 +119,5 @@ export default class GemFrame extends GemElement {
     if (name === 'tag') {
       this.appendElement();
     }
-  }
-
-  propertyChanged(name: string, _oldValue: any, value: any) {
-    if (this.app && name === 'data') this.app[name] = value;
   }
 }

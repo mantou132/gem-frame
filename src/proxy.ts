@@ -99,7 +99,11 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     importNode: document.importNode.bind(document),
 
     // event
-    addEventListener: (type, callback, options) => {
+    addEventListener: <K extends keyof DocumentEventMap>(
+      type: K,
+      callback: any,
+      options: boolean | AddEventListenerOptions,
+    ) => {
       if (['visibilitychange'].includes(type)) {
         document.addEventListener(type, callback, options);
         const unmounted = rootElement.unmounted;
@@ -178,7 +182,14 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     getSelection: getSelection.bind(window),
     matchMedia: matchMedia.bind(window),
     open: open.bind(window),
-    postMessage: postMessage.bind(window),
+    postMessage: (data: any) => {
+      rootElement.dispatchEvent(new MessageEvent('message', { data }));
+    },
+    parent: {
+      postMessage: (data: any) => {
+        window.dispatchEvent(new MessageEvent('message', { data }));
+      },
+    },
     prompt: prompt.bind(window),
     // gem
     Image,
@@ -193,10 +204,26 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     history,
     __gemHistory: window.__gemHistory,
     __litHtml: window.__litHtml,
-    addEventListener: (type, callback, options) => {
+    addEventListener: <K extends keyof WindowEventMap>(
+      type: K,
+      callback: any,
+      options: boolean | AddEventListenerOptions,
+    ) => {
       if (['load', 'DOMContentLoaded'].includes(type)) {
-        callback();
-      } else if (['unload'].includes(type)) {
+        callback(new CustomEvent(type));
+      } else if (['resize'].includes(type)) {
+        // 未考虑 `removeEventListener`
+        if (window.ResizeObserver) {
+          let called = false; // `observe` 会立刻调用回调
+          const resizeObserver = new ResizeObserver(() => {
+            if (called) {
+              callback(new CustomEvent(type));
+            }
+            called = true;
+          });
+          resizeObserver.observe(rootElement);
+        }
+      } else if (['unload', 'beforeunload'].includes(type)) {
         window.addEventListener(type, callback, options);
         const unmounted = rootElement.unmounted;
         rootElement.unmounted = () => {
