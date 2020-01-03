@@ -1,24 +1,30 @@
-import { html, GemElement, attribute, property, customElement, connectStore, history } from '@mantou/gem';
+import { html, GemElement } from '@mantou/gem/lib/element';
+import { attribute, property, customElement, emitter } from '@mantou/gem/lib/decorators';
 import Realm from 'realms-shim';
 
 import { setProxy } from './proxy';
 
 const fetchedScript = new Set();
 
-type FrameElement = GemElement & { [index: string]: any };
+type AppElement = GemElement & { data: object };
 
 /**
  * @attr src
  * @attr tag
+ * @fires error
  */
 @customElement('gem-frame')
-@connectStore(history.historyState)
 export default class GemFrame extends GemElement {
+  // 资源路径，支持 html, json, js
   @attribute src: string;
+  // 自定义元素 tagName
   @attribute tag: string;
-  @property data: any;
+  // 传递一个对象到子 App
+  @property data: object = {};
+  // 加载执行时发生错误, `event.detail` 获取该错误对象
+  @emitter error: Function;
 
-  private element: FrameElement;
+  private app: AppElement;
 
   get useIFrame() {
     return !this.tag;
@@ -51,30 +57,44 @@ export default class GemFrame extends GemElement {
     if (!src) return; // 静默失败
     const text = await (await fetch(src)).text();
     const r = Realm.makeRootRealm();
-    r.evaluate(text, setProxy(this.element, doc));
+    try {
+      // 在当前上下文中执行，所以不能用 `Error.prepareStackTrace` 改写子 App 中的异步错误
+      r.evaluate(text, setProxy(this.app, doc));
+    } catch (err) {
+      this.error(err);
+    }
     fetchedScript.add(this.src);
   }
 
   private appendElement() {
-    if (this.element) this.element.remove();
-    this.element = document.createElement(this.tag) as FrameElement;
-    this.element.data = this.data;
-    this.shadowRoot.append(this.element);
+    if (this.app) this.app.remove();
+    this.app = document.createElement(this.tag) as AppElement;
+    // 错误传播
+    this.app.onerror = (err: CustomEvent) => this.error(err.detail);
+    this.app.data = this.data;
+    this.shadowRoot.append(this.app);
   }
 
-  mounted() {
-    if (!this.useIFrame) {
-      this.appendElement();
-      this.fetchScript();
-    }
-  }
+  private errorHandle = (err: ErrorEvent) => {
+    // 捕获到的错误不能区分来源！！！
+    // 没有调用栈！！！
+    this.error(err.error);
+  };
+
   render() {
+    const renderedElementTagName = this.useIFrame ? 'iframe' : this.tag;
+    const renderedElement = this.useIFrame
+      ? html`
+          <iframe src=${this.src}></iframe>
+        `
+      : '';
     return html`
       <style>
         :host {
+          all: initial;
           display: block;
         }
-        ${this.tag || 'iframe'} {
+        ${renderedElementTagName} {
           border: none;
           overflow: scroll;
           display: block;
@@ -82,13 +102,21 @@ export default class GemFrame extends GemElement {
           height: 100%;
         }
       </style>
-      ${this.useIFrame
-        ? html`
-            <iframe src=${this.src}></iframe>
-          `
-        : ''}
+      ${renderedElement}
     `;
   }
+
+  mounted() {
+    if (!this.useIFrame) {
+      this.appendElement();
+      this.fetchScript();
+    }
+    window.addEventListener('error', this.errorHandle);
+    return () => {
+      window.removeEventListener('error', this.errorHandle);
+    };
+  }
+
   attributeChanged(name: string) {
     if (name === 'src') {
       this.fetchScript();
@@ -97,7 +125,8 @@ export default class GemFrame extends GemElement {
       this.appendElement();
     }
   }
+
   propertyChanged(name: string, _oldValue: any, value: any) {
-    if (this.element) this.element[name] = value;
+    if (this.app && name === 'data') this.app[name] = value;
   }
 }

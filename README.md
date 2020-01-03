@@ -15,6 +15,8 @@ Custom element isolation execution to ensure the host environment is safe
 
 ## issue
 
-* call error handle
-* error event propagation
-* error capture
+* async error capture & error stack
+
+## todo
+
+* cross framework
