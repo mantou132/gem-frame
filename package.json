@@ -11,10 +11,11 @@
   "author": "王先硚",
   "license": "ISC",
   "dependencies": {
-    "@mantou/gem": "^0.2.16",
+    "@mantou/gem": "^0.3.12",
     "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
   },
   "devDependencies": {
+    "@types/resize-observer-browser": "^0.1.3",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
     "clean-webpack-plugin": "^3.0.0",

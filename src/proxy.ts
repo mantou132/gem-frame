@@ -142,6 +142,8 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     Response,
     Request,
     XMLHttpRequest,
+    WebSocket,
+    EventSource,
     URL,
     URLSearchParams,
     navigator,
@@ -202,7 +204,6 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     localStorage,
     sessionStorage,
     history,
-    __gemHistory: window.__gemHistory,
     __litHtml: window.__litHtml,
     addEventListener: <K extends keyof WindowEventMap>(
       type: K,
@@ -223,7 +224,7 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
           });
           resizeObserver.observe(rootElement);
         }
-      } else if (['unload', 'beforeunload'].includes(type)) {
+      } else if (['popstate', 'unload', 'beforeunload'].includes(type)) {
         window.addEventListener(type, callback, options);
         const unmounted = rootElement.unmounted;
         rootElement.unmounted = () => {
@@ -247,7 +248,6 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
   const allowWriteWindow = {
     webpackJsonp: true,
     name: true,
-    __gemHistory: true,
     __litHtml: true,
     litHtmlVersions: true,
   };
