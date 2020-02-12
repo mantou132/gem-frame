@@ -8,6 +8,8 @@ import { GemElement } from '@mantou/gem/lib/element';
 
 import GemFrame from './index';
 
+const emptyFunction = new Function();
+
 function generateProxy(target: any, name: string, allowRead: object, allowWrite: object) {
   return new Proxy(target, {
     get(_, prop) {
@@ -15,7 +17,7 @@ function generateProxy(target: any, name: string, allowRead: object, allowWrite:
         return allowRead[prop];
       } else {
         console.warn(`Read forbidden property: \`${name}.${String(prop)}\``);
-        return new Function();
+        return emptyFunction;
       }
     },
     set(_, prop, value) {
@@ -29,7 +31,20 @@ function generateProxy(target: any, name: string, allowRead: object, allowWrite:
   });
 }
 
+// 避免执行子 app 中的 `render(xx, ele)` 方法
+function avoidRender(ele: Element) {
+  Object.assign(ele, {
+    insertBefore: emptyFunction,
+    querySelector: (selector: string) => {
+      const e = ele.querySelector(selector);
+      if (e) avoidRender(e);
+      return e;
+    },
+  });
+}
+
 export function setProxy(rootElement: GemElement, doc = new Document()) {
+  avoidRender(doc.body);
   const allowReadDocument = {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
     body: doc.body,
@@ -256,6 +271,7 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
   return Object.assign(allowReadWindow, {
     document: generateProxy(document, 'document', allowReadDocument, allowWriteDocument),
     window: global,
+    global: global, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
     globalThis: global,
     self: global,
   });

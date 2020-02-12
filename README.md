@@ -13,9 +13,6 @@ npm run build
 
 Custom element isolation execution to ensure the host environment is safe
 
-## issue
-
-* async error capture & error stack
 
 ## todo
 

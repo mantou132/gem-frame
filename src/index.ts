@@ -52,9 +52,8 @@ export default class GemFrame extends GemElement {
     }
     if (!src) return; // 静默失败
     const text = await (await fetch(src)).text();
-    const r = Realm.makeRootRealm();
+    const r = Realm.makeRootRealm({ errorHandler: this.errorEventHandler });
     try {
-      // 在当前上下文中执行，所以不能用 `Error.prepareStackTrace` 改写子 App 中的异步错误
       r.evaluate(text, setProxy(this.app, doc));
     } catch (err) {
       this.error(err);
@@ -70,10 +69,8 @@ export default class GemFrame extends GemElement {
     this.shadowRoot.append(this.app);
   }
 
-  private errorHandle = (err: ErrorEvent) => {
-    // 捕获到的错误不能区分来源！！！
-    // 没有调用栈！！！
-    this.error(err.error);
+  private errorEventHandler = ({ error }: ErrorEvent) => {
+    this.error(error);
   };
 
   render() {
@@ -106,10 +103,6 @@ export default class GemFrame extends GemElement {
       this.appendElement();
       this.fetchScript();
     }
-    window.addEventListener('error', this.errorHandle);
-    return () => {
-      window.removeEventListener('error', this.errorHandle);
-    };
   }
 
   attributeChanged(name: string) {
