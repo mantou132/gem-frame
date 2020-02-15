@@ -20,11 +20,7 @@ export default class GemFrame extends GemElement {
   // 加载执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
 
-  private app: GemFrame;
-
-  get useIFrame() {
-    return !this.tag;
-  }
+  private app: GemElement;
 
   async fetchScript() {
     if (!this.src) return;
@@ -54,19 +50,23 @@ export default class GemFrame extends GemElement {
     const text = await (await fetch(src)).text();
     const r = Realm.makeRootRealm({ errorHandler: this.errorEventHandler });
     try {
-      r.evaluate(text, setProxy(this.app, doc));
+      r.evaluate(text, setProxy(this, this.app, doc));
     } catch (err) {
       this.error(err);
     }
     fetchedScript.add(this.src);
   }
 
-  private appendElement() {
+  private updateElement() {
     if (this.app) this.app.remove();
-    this.app = document.createElement(this.tag) as GemFrame;
-    // 错误传播
-    this.app.onerror = (err: CustomEvent) => this.error(err.detail);
-    this.shadowRoot.append(this.app);
+    if (!this.tag) {
+      this.app = this;
+    } else {
+      this.app = document.createElement(this.tag) as GemElement;
+      // 错误传播
+      this.app.onerror = (err: CustomEvent) => this.error(err.detail);
+      this.shadowRoot.append(this.app);
+    }
   }
 
   private errorEventHandler = ({ error }: ErrorEvent) => {
@@ -74,19 +74,13 @@ export default class GemFrame extends GemElement {
   };
 
   render() {
-    const renderedElementTagName = this.useIFrame ? 'iframe' : this.tag;
-    const renderedElement = this.useIFrame
-      ? html`
-          <iframe src=${this.src}></iframe>
-        `
-      : '';
     return html`
       <style>
         :host {
           all: initial;
           display: block;
         }
-        ${renderedElementTagName} {
+        ${this.tag || ':host'} {
           border: none;
           overflow: scroll;
           display: block;
@@ -94,15 +88,12 @@ export default class GemFrame extends GemElement {
           height: 100%;
         }
       </style>
-      ${renderedElement}
     `;
   }
 
   mounted() {
-    if (!this.useIFrame) {
-      this.appendElement();
-      this.fetchScript();
-    }
+    this.updateElement();
+    this.fetchScript();
   }
 
   attributeChanged(name: string) {
@@ -110,7 +101,7 @@ export default class GemFrame extends GemElement {
       this.fetchScript();
     }
     if (name === 'tag') {
-      this.appendElement();
+      this.updateElement();
     }
   }
 }

@@ -20,11 +20,8 @@ render(
         height: 300px;
       }
     </style>
-    <gem-frame
-      @error=${errorHandle}
-      tag="app-a-root"
-      src="https://mantou132.github.io/gem-microfe/dist/app/"
-    ></gem-frame>
+    <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/react/"></gem-frame>
+    <gem-frame @error=${errorHandle} tag="app-a-root" src="https://gem-microfe.netlify.com/app/"></gem-frame>
   `,
   document.body,
 );

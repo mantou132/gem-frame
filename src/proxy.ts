@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 /**
  * 没有提供真正的沙箱，因为共享 DOM，例如:
  *
@@ -17,7 +18,7 @@ function generateProxy(target: any, name: string, allowRead: object, allowWrite:
         return allowRead[prop];
       } else {
         console.warn(`Read forbidden property: \`${name}.${String(prop)}\``);
-        return emptyFunction;
+        return target[prop] ? emptyFunction : undefined;
       }
     },
     set(_, prop, value) {
@@ -43,12 +44,14 @@ function avoidRender(ele: Element) {
   });
 }
 
-export function setProxy(rootElement: GemElement, doc = new Document()) {
+export function setProxy(frameElement: GemFrame, rootElement: GemElement, doc = new Document()) {
+  const isCustomElementApp = frameElement !== rootElement;
   avoidRender(doc.body);
   const allowReadDocument = {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
-    body: doc.body,
+    body: isCustomElementApp ? doc.body : rootElement.shadowRoot,
     documentElement: doc.documentElement,
+    activeElement: null,
     get cookie() {
       return document.cookie;
     },
@@ -113,12 +116,16 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     adoptNode: document.adoptNode.bind(document),
     importNode: document.importNode.bind(document),
 
+    //react
+    createEvent: document.createEvent.bind(document),
+
     // event
     addEventListener: <K extends keyof DocumentEventMap>(
       type: K,
       callback: any,
       options: boolean | AddEventListenerOptions,
     ) => {
+      // 拦截不到 react 事件，导致 react-router link 不能正常跳转
       if (['visibilitychange'].includes(type)) {
         document.addEventListener(type, callback, options);
         const unmounted = rootElement.unmounted;
@@ -150,6 +157,9 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     // common
     get name() {
       return window.name;
+    },
+    get top() {
+      return window.top;
     },
     console,
     caches,
@@ -258,6 +268,10 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     get litHtmlVersions() {
       return window.litHtmlVersions;
     },
+    //react
+    get __react_router_build__() {
+      return window['__react_router_build__'];
+    },
   };
 
   const allowWriteWindow = {
@@ -265,6 +279,7 @@ export function setProxy(rootElement: GemElement, doc = new Document()) {
     name: true,
     __litHtml: true,
     litHtmlVersions: true,
+    __react_router_build__: true,
   };
 
   const global = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
