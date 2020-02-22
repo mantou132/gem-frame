@@ -44,7 +44,7 @@ function avoidRender(ele: Element) {
   });
 }
 
-export function setProxy(frameElement: GemFrame, rootElement: GemElement, doc = new Document()) {
+export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement, doc = new Document()) {
   const isCustomElementApp = frameElement !== rootElement;
   avoidRender(doc.body);
   const allowReadDocument = {
@@ -289,5 +289,6 @@ export function setProxy(frameElement: GemFrame, rootElement: GemElement, doc = 
     global: global, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
     globalThis: global,
     self: global,
+    ...frameElement.context,
   });
 }

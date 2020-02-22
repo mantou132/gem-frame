@@ -1,12 +1,14 @@
 import { html, GemElement } from '@mantou/gem/lib/element';
-import { attribute, customElement, emitter } from '@mantou/gem/lib/decorators';
+import { attribute, customElement, emitter, property } from '@mantou/gem/lib/decorators';
 import Realm from 'realms-shim';
 
-import { setProxy } from './proxy';
+import { getGlobalObject } from './proxy';
 
 const fetchedScript = new Set();
 
 /**
+ * @custom-element gem-frame
+ * @prop context
  * @attr src
  * @attr tag
  * @fires error
@@ -17,8 +19,10 @@ export default class GemFrame extends GemElement {
   @attribute src: string;
   // 自定义元素 tagName
   @attribute tag: string;
-  // 加载执行时发生错误, `event.detail` 获取该错误对象
+  // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
+  // 共享到子 app 的对象
+  @property context: object = {};
 
   private app: GemElement;
 
@@ -50,7 +54,7 @@ export default class GemFrame extends GemElement {
     const text = await (await fetch(src)).text();
     const r = Realm.makeRootRealm({ errorHandler: this.errorEventHandler });
     try {
-      r.evaluate(text, setProxy(this, this.app, doc));
+      r.evaluate(text, getGlobalObject(this, this.app, doc));
     } catch (err) {
       this.error(err);
     }
@@ -82,7 +86,7 @@ export default class GemFrame extends GemElement {
         }
         ${this.tag || ':host'} {
           border: none;
-          overflow: scroll;
+          overflow: auto;
           display: block;
           width: 100%;
           height: 100%;
