@@ -1,8 +1,20 @@
-import { html, GemElement } from '@mantou/gem/lib/element';
-import { attribute, customElement, emitter, property } from '@mantou/gem/lib/decorators';
+import { GemElement } from '@mantou/gem/lib/element';
+import { attribute, customElement, emitter, property, adoptedStyle } from '@mantou/gem/lib/decorators';
+import { css, createCSSSheet } from '@mantou/gem/lib/utils';
 import Realm from 'realms-shim';
 
 import { getGlobalObject } from './proxy';
+
+// 方便清空内容
+const frameStyle = createCSSSheet(css`
+  :host {
+    all: initial;
+    display: block;
+    border: none;
+    overflow: auto;
+    position: relative;
+  }
+`);
 
 const fetchedScript = new Set();
 
@@ -14,6 +26,7 @@ const fetchedScript = new Set();
  * @fires error
  */
 @customElement('gem-frame')
+@adoptedStyle(frameStyle)
 export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
@@ -24,12 +37,12 @@ export default class GemFrame extends GemElement {
   // 共享到子 app 的对象
   @property context: object = {};
 
-  private app: GemElement;
-
-  async fetchScript() {
+  async _fetchScript() {
     if (!this.src) return;
     // 自定义元素不需要重复执行
     if (this.tag && fetchedScript.has(this.src)) return;
+    // react app 执行前清空内容
+    if (!this.tag) this._cleannContent();
     let src = this.src.startsWith('//') ? `${location.protocol}${this.src}` : this.src;
     let doc: Document;
     const url = new URL(src, location.origin);
@@ -53,60 +66,92 @@ export default class GemFrame extends GemElement {
     }
     if (!src) return; // 静默失败
     const text = await (await fetch(src)).text();
-    const r = Realm.makeRootRealm({ errorHandler: this.errorEventHandler });
+    const r = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
     try {
-      r.evaluate(text, getGlobalObject(this, this.app, doc));
+      r.evaluate(text, getGlobalObject(this, doc));
     } catch (err) {
       this.error(err);
     }
     fetchedScript.add(this.src);
   }
 
-  private updateElement() {
-    if (this.app) this.app.remove();
-    if (!this.tag) {
-      this.app = this;
-    } else {
-      this.app = document.createElement(this.tag) as GemElement;
+  _updateElement() {
+    if (this.tag) {
+      this._cleannContent();
+      const app = document.createElement(this.tag) as GemElement;
       // 错误传播
-      this.app.onerror = (err: CustomEvent) => this.error(err.detail);
-      this.shadowRoot.append(this.app);
+      app.addEventListener('error', (err: CustomEvent) => this.error(err.detail));
+      this.shadowRoot.append(app);
     }
   }
 
-  private errorEventHandler = ({ error }: ErrorEvent) => {
+  _eventListenerList: [EventTarget, string, any, boolean | AddEventListenerOptions][] = [];
+
+  _addProxyEventListener(
+    target: EventTarget,
+    event: string,
+    callback: any,
+    options: boolean | AddEventListenerOptions,
+  ) {
+    target.addEventListener(event, callback, options);
+    this._eventListenerList.push([target, event, callback, options]);
+  }
+
+  _removeProxyEventListener(
+    target: EventTarget,
+    event: string,
+    callback: any,
+    options: boolean | AddEventListenerOptions,
+  ) {
+    target.removeEventListener(event, callback, options);
+    const index = this._eventListenerList.findIndex(([_target, _event, _callback, _options]) => {
+      return (
+        target === _target &&
+        event === _event &&
+        callback === _callback &&
+        (typeof options === 'object' && typeof _options === 'object'
+          ? options.capture === _options.capture &&
+            options.once === _options.once &&
+            options.passive === _options.passive
+          : options === _options)
+      );
+    });
+    if (index !== -1) this._eventListenerList.splice(index, 1);
+  }
+
+  _cleannContent() {
+    this.shadowRoot.innerHTML = '';
+  }
+
+  _cleanEventListener() {
+    // 清除 `<gem-frame>` 以及 `window`, `document` 上的事件监听器
+    this._eventListenerList.forEach(([target, event, callback, options]) => {
+      target.removeEventListener(event, callback, options);
+    });
+    this._eventListenerList = [];
+  }
+
+  _errorEventHandler = ({ error }: ErrorEvent) => {
     this.error(error);
   };
 
-  render() {
-    return html`
-      <style>
-        :host {
-          all: initial;
-          display: block;
-        }
-        ${this.tag || ':host'} {
-          border: none;
-          overflow: auto;
-          display: block;
-          width: 100%;
-          height: 100%;
-        }
-      </style>
-    `;
+  mounted() {
+    this._updateElement();
+    this._fetchScript();
   }
 
-  mounted() {
-    this.updateElement();
-    this.fetchScript();
+  unmounted() {
+    this._cleanEventListener();
   }
 
   attributeChanged(name: string) {
+    this._cleanEventListener();
+
     if (name === 'src') {
-      this.fetchScript();
+      this._fetchScript();
     }
     if (name === 'tag') {
-      this.updateElement();
+      this._updateElement();
     }
   }
 }

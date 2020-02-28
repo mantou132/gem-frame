@@ -5,8 +5,6 @@
  * * `Node.ownerDocument` 就能访问到原始 `document` 对象
  * * <script> 能执行任意代码
  */
-import { GemElement } from '@mantou/gem/lib/element';
-
 import GemFrame from './index';
 
 const emptyFunction = new Function();
@@ -42,14 +40,13 @@ function avoidRender(ele: Element) {
       return e;
     },
   });
+  return ele;
 }
 
-export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement, doc = new Document()) {
-  const isCustomElementApp = frameElement !== rootElement;
-  avoidRender(doc.body);
+export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
   const allowReadDocument = {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
-    body: isCustomElementApp ? doc.body : rootElement.shadowRoot,
+    body: frameElement.tag ? avoidRender(doc.body) : frameElement.shadowRoot,
     documentElement: doc.documentElement,
     activeElement: null,
     get cookie() {
@@ -66,19 +63,19 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
     },
     location,
     get getSelection() {
-      return rootElement.shadowRoot.getSelection;
+      return frameElement.shadowRoot.getSelection;
     },
     get elementFromPoint() {
-      return rootElement.shadowRoot.elementFromPoint;
+      return frameElement.shadowRoot.elementFromPoint;
     },
     get elementsFromPoint() {
-      return rootElement.shadowRoot.elementsFromPoint;
+      return frameElement.shadowRoot.elementsFromPoint;
     },
     get caretRangeFromPoint() {
-      return rootElement.shadowRoot.caretRangeFromPoint;
+      return frameElement.shadowRoot.caretRangeFromPoint;
     },
     get caretPositionFromPoint() {
-      return rootElement.shadowRoot.caretPositionFromPoint;
+      return frameElement.shadowRoot.caretPositionFromPoint;
     },
 
     // <gem-title>
@@ -101,7 +98,7 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
           set(value) {
             const gemframe = new GemFrame();
             gemframe.src = value;
-            gemframe.fetchScript();
+            gemframe._fetchScript();
             return true;
           },
         });
@@ -127,19 +124,18 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
     ) => {
       // 拦截不到 react 事件，导致 react-router link 不能正常跳转
       if (['visibilitychange'].includes(type)) {
-        document.addEventListener(type, callback, options);
-        const unmounted = rootElement.unmounted;
-        rootElement.unmounted = () => {
-          unmounted && unmounted();
-          document.removeEventListener(type, callback, options);
-        };
+        frameElement._addProxyEventListener(document, type, callback, options);
       } else {
         // mouse event, pointer event, keyboard event...
-        rootElement.addEventListener(type, callback, options);
+        frameElement._addProxyEventListener(frameElement, type, callback, options);
       }
     },
     removeEventListener: (type, callback, options) => {
-      rootElement.removeEventListener(type, callback, options);
+      if (['visibilitychange'].includes(type)) {
+        frameElement._removeProxyEventListener(document, type, callback, options);
+      } else {
+        frameElement._removeProxyEventListener(frameElement, type, callback, options);
+      }
     },
   };
 
@@ -181,10 +177,10 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
     DOMRect,
     DOMRectReadOnly,
     get innerHeight() {
-      return rootElement.clientHeight;
+      return frameElement.clientHeight;
     },
     get innerWidth() {
-      return rootElement.clientWidth;
+      return frameElement.clientWidth;
     },
     isSecureContext,
     performance,
@@ -210,7 +206,7 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
     matchMedia: matchMedia.bind(window),
     open: open.bind(window),
     postMessage: (data: any) => {
-      rootElement.dispatchEvent(new MessageEvent('message', { data }));
+      frameElement.dispatchEvent(new MessageEvent('message', { data }));
     },
     parent: {
       postMessage: (data: any) => {
@@ -236,7 +232,9 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
       options: boolean | AddEventListenerOptions,
     ) => {
       if (['load', 'DOMContentLoaded'].includes(type)) {
-        callback(new CustomEvent(type));
+        // 未考虑 `removeEventListener`
+        // 直接执行
+        setTimeout(() => callback(new CustomEvent(type)));
       } else if (['resize'].includes(type)) {
         // 未考虑 `removeEventListener`
         if (window.ResizeObserver) {
@@ -247,22 +245,22 @@ export function getGlobalObject(frameElement: GemFrame, rootElement: GemElement,
             }
             called = true;
           });
-          resizeObserver.observe(rootElement);
+          resizeObserver.observe(frameElement);
         }
       } else if (['popstate', 'unload', 'beforeunload'].includes(type)) {
-        window.addEventListener(type, callback, options);
-        const unmounted = rootElement.unmounted;
-        rootElement.unmounted = () => {
-          unmounted && unmounted();
-          window.removeEventListener(type, callback, options);
-        };
+        frameElement._addProxyEventListener(window, type, callback, options);
       } else {
         // mouse event, pointer event, keyboard event...
-        rootElement.addEventListener(type, callback, options);
+        frameElement._addProxyEventListener(frameElement, type, callback, options);
       }
     },
     removeEventListener: (type, callback, options) => {
-      rootElement.removeEventListener(type, callback, options);
+      if (['popstate', 'unload', 'beforeunload'].includes(type)) {
+        frameElement._removeProxyEventListener(window, type, callback, options);
+      } else {
+        // mouse event, pointer event, keyboard event...
+        frameElement._removeProxyEventListener(frameElement, type, callback, options);
+      }
     },
     // lit-html
     get litHtmlVersions() {
