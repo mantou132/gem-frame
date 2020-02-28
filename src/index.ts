@@ -28,7 +28,8 @@ export default class GemFrame extends GemElement {
 
   async fetchScript() {
     if (!this.src) return;
-    if (fetchedScript.has(this.src)) return;
+    // 自定义元素不需要重复执行
+    if (this.tag && fetchedScript.has(this.src)) return;
     let src = this.src.startsWith('//') ? `${location.protocol}${this.src}` : this.src;
     let doc: Document;
     const url = new URL(src, location.origin);
