@@ -3,9 +3,19 @@
  * 没有提供真正的沙箱，因为共享 DOM，例如:
  *
  * * `Node.ownerDocument` 就能访问到原始 `document` 对象
- * * <script> 能执行任意代码
+ * * `<script>` 能执行任意代码
  */
 import GemFrame from './index';
+
+// React 事件系统使用 `ownerDocument` 监听事件，无法拦截
+// 导致 `Event.target` 错误
+// 这里修正了 `Event.target` 的问题，但是可能对外部系统产生影响
+Object.defineProperty(Event.prototype, 'target', {
+  configurable: true,
+  get() {
+    return this.composedPath()[0];
+  },
+});
 
 const emptyFunction = new Function();
 
@@ -122,7 +132,6 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
       callback: any,
       options: boolean | AddEventListenerOptions,
     ) => {
-      // 拦截不到 react 事件，导致 react-router link 不能正常跳转
       if (['visibilitychange'].includes(type)) {
         frameElement._addProxyEventListener(document, type, callback, options);
       } else {
@@ -280,13 +289,15 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
     __react_router_build__: true,
   };
 
-  const global = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
+  const globalProxy = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
+  const documentProxy = generateProxy(document, 'document', allowReadDocument, allowWriteDocument);
+
   return Object.assign(allowReadWindow, {
-    document: generateProxy(document, 'document', allowReadDocument, allowWriteDocument),
-    window: global,
-    global: global, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
-    globalThis: global,
-    self: global,
+    document: documentProxy,
+    window: globalProxy,
+    global: globalProxy, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
+    globalThis: globalProxy,
+    self: globalProxy,
     ...frameElement.context,
   });
 }

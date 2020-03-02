@@ -42,7 +42,7 @@ export default class GemFrame extends GemElement {
     // 自定义元素不需要重复执行
     if (this.tag && fetchedScript.has(this.src)) return;
     // react app 执行前清空内容
-    if (!this.tag) this._cleannContent();
+    if (!this.tag) this._cleanContent();
     let src = this.src.startsWith('//') ? `${location.protocol}${this.src}` : this.src;
     let doc: Document;
     const url = new URL(src, location.origin);
@@ -77,7 +77,7 @@ export default class GemFrame extends GemElement {
 
   _updateElement() {
     if (this.tag) {
-      this._cleannContent();
+      this._cleanContent();
       const app = document.createElement(this.tag) as GemElement;
       // 错误传播
       app.addEventListener('error', (err: CustomEvent) => this.error(err.detail));
@@ -119,7 +119,7 @@ export default class GemFrame extends GemElement {
     if (index !== -1) this._eventListenerList.splice(index, 1);
   }
 
-  _cleannContent() {
+  _cleanContent() {
     this.shadowRoot.innerHTML = '';
   }
 
