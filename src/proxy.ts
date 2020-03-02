@@ -287,6 +287,9 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
     __litHtml: true,
     litHtmlVersions: true,
     __react_router_build__: true,
+
+    // vue
+    setImmediate: true,
   };
 
   const globalProxy = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);

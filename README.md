@@ -12,8 +12,3 @@ npm run build
 ## goal
 
 Custom element isolation execution to ensure the host environment is safe
-
-
-## todo
-
-* cross framework

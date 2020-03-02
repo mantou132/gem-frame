@@ -22,6 +22,8 @@ render(
     </style>
     <h1>React App</h1>
     <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/react/"></gem-frame>
+    <h1>Vue App</h1>
+    <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/vue/"></gem-frame>
     <h1>Gem App</h1>
     <gem-frame @error=${errorHandle} tag="app-a-root" src="https://gem-microfe.netlify.com/app/"></gem-frame>
   `,
