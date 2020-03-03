@@ -1,20 +1,10 @@
 import { GemElement } from '@mantou/gem/lib/element';
-import { attribute, customElement, emitter, property, adoptedStyle } from '@mantou/gem/lib/decorators';
-import { css, createCSSSheet } from '@mantou/gem/lib/utils';
+import { attribute, customElement, emitter, property } from '@mantou/gem/lib/decorators';
+import { raw } from '@mantou/gem/lib/utils';
+
 import Realm from 'realms-shim';
 
 import { getGlobalObject } from './proxy';
-
-// 方便清空内容
-const frameStyle = createCSSSheet(css`
-  :host {
-    all: initial;
-    display: block;
-    border: none;
-    overflow: auto;
-    position: relative;
-  }
-`);
 
 const fetchedScript = new Set();
 
@@ -26,7 +16,6 @@ const fetchedScript = new Set();
  * @fires error
  */
 @customElement('gem-frame')
-@adoptedStyle(frameStyle)
 export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
@@ -120,7 +109,17 @@ export default class GemFrame extends GemElement {
   }
 
   _cleanContent() {
-    this.shadowRoot.innerHTML = '';
+    this.shadowRoot.innerHTML = raw`
+      <style>
+        :host {
+          all: initial;
+          display: block;
+          border: none;
+          overflow: auto;
+          position: relative;
+        }
+      </style>
+    `;
   }
 
   _cleanEventListener() {

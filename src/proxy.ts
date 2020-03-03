@@ -58,8 +58,9 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
   let documentProxy: any;
   const allowReadDocument = {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
-    body: frameElement.tag ? avoidRender(doc.body) : frameElement.shadowRoot,
     documentElement: doc.documentElement,
+    head: frameElement.shadowRoot,
+    body: frameElement.tag ? avoidRender(doc.body) : frameElement.shadowRoot,
     activeElement: null,
     get cookie() {
       return document.cookie;
@@ -94,7 +95,6 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
     get title() {
       return document.title;
     },
-    head: document.head,
 
     // <gem-use>
     querySelector: doc.querySelector.bind(doc),

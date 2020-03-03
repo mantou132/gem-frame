@@ -11,7 +11,7 @@
   "author": "王先硚",
   "license": "ISC",
   "dependencies": {
-    "@mantou/gem": "^0.3.12",
+    "@mantou/gem": "^0.3.16",
     "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
   },
   "devDependencies": {
