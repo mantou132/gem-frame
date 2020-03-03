@@ -19,6 +19,18 @@ Object.defineProperty(Event.prototype, 'target', {
 
 const emptyFunction = new Function();
 
+function generateReader(origin: any, target: any, result: any) {
+  for (let key in target) {
+    Object.defineProperty(result, key, {
+      configurable: true,
+      get() {
+        return origin[key];
+      },
+    });
+  }
+  return result;
+}
+
 function generateProxy(target: any, name: string, allowRead: object, allowWrite: object) {
   return new Proxy(target, {
     get(_, prop) {
@@ -56,24 +68,24 @@ function avoidRender(ele: Element) {
 export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
   let globalProxy: any;
   let documentProxy: any;
-  const allowReadDocument = {
+
+  const allowWriteDocument = {
+    cookie: true,
+    // <gem-title>
+    title: true,
+  };
+
+  const allowReadDocument = generateReader(document, allowWriteDocument, {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
     documentElement: doc.documentElement,
     head: frameElement.shadowRoot,
     body: frameElement.tag ? avoidRender(doc.body) : frameElement.shadowRoot,
     activeElement: null,
-    get cookie() {
-      return document.cookie;
-    },
     get hidden() {
       return document.hidden;
     },
-    get domain() {
-      return document.domain;
-    },
-    get referrer() {
-      return document.referrer;
-    },
+    domain: document.domain,
+    referrer: document.referrer,
     location,
     get getSelection() {
       return frameElement.shadowRoot.getSelection;
@@ -89,11 +101,6 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
     },
     get caretPositionFromPoint() {
       return frameElement.shadowRoot.caretPositionFromPoint;
-    },
-
-    // <gem-title>
-    get title() {
-      return document.title;
     },
 
     // <gem-use>
@@ -156,23 +163,21 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
         frameElement._removeProxyEventListener(frameElement, type, callback, options);
       }
     },
+  });
+
+  const allowWriteWindow = {
+    webpackJsonp: true,
+    name: true,
+    __litHtml: true,
+    litHtmlVersions: true,
+    __react_router_build__: true,
+
+    // babel
+    '__core-js_shared__': true,
   };
 
-  const allowWriteDocument = {
-    cookie: true,
-    // <gem-title>
-    title: true,
-  };
-
-  const allowReadWindow = {
-    // webpack
-    get webpackJsonp() {
-      return window['webpackJsonp'];
-    },
+  const allowReadWindow = generateReader(window, allowWriteWindow, {
     // common
-    get name() {
-      return window.name;
-    },
     get top() {
       return window.top;
     },
@@ -244,7 +249,6 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
     localStorage,
     sessionStorage,
     history,
-    __litHtml: window.__litHtml,
     addEventListener: <K extends keyof WindowEventMap>(
       type: K,
       callback: any,
@@ -281,26 +285,7 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
         frameElement._removeProxyEventListener(frameElement, type, callback, options);
       }
     },
-    // lit-html
-    get litHtmlVersions() {
-      return window.litHtmlVersions;
-    },
-    //react
-    get __react_router_build__() {
-      return window['__react_router_build__'];
-    },
-  };
-
-  const allowWriteWindow = {
-    webpackJsonp: true,
-    name: true,
-    __litHtml: true,
-    litHtmlVersions: true,
-    __react_router_build__: true,
-
-    // vue
-    setImmediate: true,
-  };
+  });
 
   globalProxy = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
   documentProxy = generateProxy(document, 'document', allowReadDocument, allowWriteDocument);
