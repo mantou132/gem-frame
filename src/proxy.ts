@@ -54,6 +54,8 @@ function avoidRender(ele: Element) {
 }
 
 export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
+  let globalProxy: any;
+  let documentProxy: any;
   const allowReadDocument = {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
     body: frameElement.tag ? avoidRender(doc.body) : frameElement.shadowRoot,
@@ -114,7 +116,15 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
         });
         return script;
       }
-      return document.createElement(tag);
+      // 防止 React 注册到 document 导致不能 GC
+      const ele = document.createElement(tag);
+      Object.defineProperty(ele, 'ownerDocument', {
+        configurable: true,
+        get() {
+          return documentProxy;
+        },
+      });
+      return ele;
     },
     createComment: document.createComment.bind(document),
     createTextNode: document.createTextNode.bind(document),
@@ -292,8 +302,8 @@ export function getGlobalObject(frameElement: GemFrame, doc = new Document()) {
     setImmediate: true,
   };
 
-  const globalProxy = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
-  const documentProxy = generateProxy(document, 'document', allowReadDocument, allowWriteDocument);
+  globalProxy = generateProxy(window, 'window', allowReadWindow, allowWriteWindow);
+  documentProxy = generateProxy(document, 'document', allowReadDocument, allowWriteDocument);
 
   return Object.assign(allowReadWindow, {
     document: documentProxy,
