@@ -93,11 +93,7 @@ export function getDocument(frameElement: GemFrame) {
     createEvent: document.createEvent.bind(document),
 
     // event
-    addEventListener: <K extends keyof DocumentEventMap>(
-      type: K,
-      callback: any,
-      options: boolean | AddEventListenerOptions,
-    ) => {
+    addEventListener: (type: string, callback: Function, options: any) => {
       if (allowListenerEvent.includes(type)) {
         frameElement._addProxyEventListener(document, type, callback, options);
       } else {
@@ -105,7 +101,7 @@ export function getDocument(frameElement: GemFrame) {
         frameElement._addProxyEventListener(frameElement, type, callback, options);
       }
     },
-    removeEventListener: (type, callback, options) => {
+    removeEventListener: (type: string, callback: Function, options: any) => {
       if (allowListenerEvent.includes(type)) {
         frameElement._removeProxyEventListener(document, type, callback, options);
       } else {

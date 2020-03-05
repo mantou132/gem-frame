@@ -1,10 +1,13 @@
-import { GemElement } from '@mantou/gem/lib/element';
+import { GemElement, render, html } from '@mantou/gem/lib/element';
 import { attribute, customElement, emitter, property, adoptedStyle } from '@mantou/gem/lib/decorators';
 import { createCSSSheet, css } from '@mantou/gem/lib/utils';
+import '@mantou/gem/lib/history';
 
 import Realm from 'realms-shim';
 
 import { getGlobalObject } from './proxy';
+
+const tagFrameMap: Record<string, GemFrame> = {};
 
 // 由于 js 的问题导致不兼容 Safari
 // 所以这里重新使用 constructor stylesheet，以便子应用操作 `ShadowDOM`
@@ -23,6 +26,7 @@ const frameStyle = createCSSSheet(css`
  * @custom-element gem-frame
  * @prop context
  * @attr src
+ * @attr tag
  * @fires error
  * @fires unload
  */
@@ -31,6 +35,9 @@ const frameStyle = createCSSSheet(css`
 export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
+  // 自定义元素标签，如果正确的元素标签，则不会重复执行，适用于单元素 app
+  // 不同的 app 不能写相同的名称，否则找不到 tag 对应的原始 `<gem-frame>`
+  @attribute tag: string;
   // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
   @emitter unload: Function;
@@ -60,15 +67,28 @@ export default class GemFrame extends GemElement {
     if (!this.src) return;
 
     console.time(this._shape);
-    this._currentRealm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
-    this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
-    this._proxyObject = getGlobalObject(this);
-    try {
-      this._execScript(await this._fetchScript());
-    } finally {
-      this._loaded = true;
-      console.timeEnd(this._shape);
+    if (this.tag && customElements.get(this.tag)) {
+      if (tagFrameMap[this.tag] === this) {
+        const app = document.createElement(this.tag) as GemElement;
+        render(app, this.shadowRoot);
+      } else {
+        this.replaceWith(tagFrameMap[this.tag]);
+      }
+    } else {
+      try {
+        this._currentRealm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
+        // 是自定义元素时 `<iframe>` 不能移除，chrome bug?
+        if (!this.tag || tagFrameMap[this.tag]) {
+          this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
+        }
+        this._proxyObject = getGlobalObject(this);
+        this._execScript(await this._fetchScript());
+      } catch {}
     }
+    this._loaded = true;
+    console.timeEnd(this._shape);
+    // 初次执行自定义元素记录绑定的 `<gem-frame>`
+    if (this.tag && !(this.tag in tagFrameMap)) tagFrameMap[this.tag] = this;
   };
 
   _fetchScript = async () => {
@@ -146,13 +166,16 @@ export default class GemFrame extends GemElement {
     // 模拟子 app window unload 事件
     this.unload();
     // 清空 DOM 内容
-    this.shadowRoot.innerHTML = '';
+    render(html``, this.shadowRoot);
     // 清除 `<gem-frame>` 以及 `window`, `document` 上的事件监听器
     this._eventListenerList.forEach(([target, event, callback, options]) => {
       target.removeEventListener(event, callback, options);
     });
     this._eventListenerList = [];
-    if (this._currentRealmIFrameElement) this._currentRealmIFrameElement.remove();
+    if (this._currentRealmIFrameElement) {
+      this._currentRealmIFrameElement.remove();
+      this._currentRealmIFrameElement = null;
+    }
     this._loaded = false;
   };
 

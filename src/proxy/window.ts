@@ -2,7 +2,7 @@ import { generateProxy } from '../utils';
 
 import GemFrame from '../index';
 
-const allowListenerEvent = ['popstate'];
+const allowListenerEvent = ['popstate', 'hashchange'];
 
 export function getWindow(frameElement: GemFrame) {
   const allowWriteWindow = {
@@ -11,12 +11,19 @@ export function getWindow(frameElement: GemFrame) {
 
   const allowReadWindow = {
     // common
+    scrollTo: frameElement.scrollTo.bind(frameElement),
     top,
     console,
     caches,
     Headers,
     Response,
-    Request,
+    Request: function(req: RequestInfo, init?: RequestInit) {
+      if (typeof req === 'string') {
+        return new Request(new URL(req, frameElement._url).href, init);
+      } else {
+        return new Request(req, init);
+      }
+    },
     XMLHttpRequest,
     WebSocket,
     EventSource,
@@ -44,7 +51,13 @@ export function getWindow(frameElement: GemFrame) {
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope#Methods
     atob: atob.bind(window),
     btoa: btoa.bind(window),
-    fetch: fetch.bind(window),
+    fetch: (req: RequestInfo, init: RequestInit) => {
+      if (typeof req === 'string') {
+        return fetch(new URL(req, frameElement._url).href, init);
+      } else {
+        return fetch(req, init);
+      }
+    },
     createImageBitmap: createImageBitmap.bind(window),
     setTimeout: setTimeout.bind(window),
     clearTimeout: clearTimeout.bind(window),
@@ -74,6 +87,9 @@ export function getWindow(frameElement: GemFrame) {
     DOMParser,
     HTMLElement,
     HTMLIFrameElement,
+    HTMLTemplateElement,
+    SVGSVGElement,
+
     customElements,
     CustomEvent,
     Node,
@@ -81,11 +97,7 @@ export function getWindow(frameElement: GemFrame) {
     localStorage,
     sessionStorage,
     history,
-    addEventListener: <K extends keyof WindowEventMap>(
-      type: K,
-      callback: any,
-      options: boolean | AddEventListenerOptions,
-    ) => {
+    addEventListener: (type: string, callback: Function, options: any) => {
       if (['load', 'DOMContentLoaded'].includes(type)) {
         // 未考虑 `removeEventListener`
         // 直接执行
@@ -109,7 +121,7 @@ export function getWindow(frameElement: GemFrame) {
         frameElement._addProxyEventListener(frameElement, type, callback, options);
       }
     },
-    removeEventListener: (type, callback, options) => {
+    removeEventListener: (type: string, callback: Function, options: any) => {
       if (allowListenerEvent.includes(type)) {
         frameElement._removeProxyEventListener(window, type, callback, options);
       } else {
