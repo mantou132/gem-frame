@@ -6,7 +6,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es6",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2018", "dom", "DOM.Iterable"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src"]

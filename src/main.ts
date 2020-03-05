@@ -1,9 +1,9 @@
 import { render, html } from '@mantou/gem';
 import './';
 
-const errorHandle = (e: ErrorEvent) => {
-  console.log('<gem-frame> capture:', e);
-};
+function errorHandle(e: ErrorEvent) {
+  console.log(this, e);
+}
 
 render(
   html`
@@ -25,7 +25,7 @@ render(
     <h1>Vue App</h1>
     <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/vue/"></gem-frame>
     <h1>Gem App</h1>
-    <gem-frame @error=${errorHandle} tag="app-a-root" src="https://gem-microfe.netlify.com/app/"></gem-frame>
+    <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/app/"></gem-frame>
   `,
   document.body,
 );
