@@ -48,6 +48,7 @@ export default class GemFrame extends GemElement {
 
   _loaded = false;
   _currentRealm = null;
+  _currentRealmIFrameElement: HTMLIFrameElement = null;
   _proxyObject = null;
 
   _errorEventHandler = ({ error }: ErrorEvent) => {
@@ -60,6 +61,7 @@ export default class GemFrame extends GemElement {
 
     console.time(this._shape);
     this._currentRealm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
+    this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
     this._proxyObject = getGlobalObject(this);
     try {
       this._execScript(await this._fetchScript());
@@ -150,6 +152,7 @@ export default class GemFrame extends GemElement {
       target.removeEventListener(event, callback, options);
     });
     this._eventListenerList = [];
+    if (this._currentRealmIFrameElement) this._currentRealmIFrameElement.remove();
     this._loaded = false;
   };
 
