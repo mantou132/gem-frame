@@ -1,7 +1,6 @@
 import { GemElement, render, html } from '@mantou/gem/lib/element';
 import { attribute, customElement, emitter, property, adoptedStyle } from '@mantou/gem/lib/decorators';
 import { createCSSSheet, css } from '@mantou/gem/lib/utils';
-import '@mantou/gem/lib/history';
 
 import Realm from 'realms-shim';
 
@@ -27,6 +26,7 @@ const frameStyle = createCSSSheet(css`
  * @prop context
  * @attr src
  * @attr tag
+ * @attr basepath
  * @fires error
  * @fires unload
  */
@@ -35,9 +35,9 @@ const frameStyle = createCSSSheet(css`
 export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
-  // 自定义元素标签，如果正确的元素标签，则不会重复执行，适用于单元素 app
-  // 不同的 app 不能写相同的名称，否则找不到 tag 对应的原始 `<gem-frame>`
+  // 自定义元素标签，只适用于单元素 app
   @attribute tag: string;
+  @attribute basepath: string;
   // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
   @emitter unload: Function;
@@ -122,7 +122,7 @@ export default class GemFrame extends GemElement {
 
   _execScript = (text: string) => {
     try {
-      this._currentRealm.evaluate(text, this._proxyObject);
+      return this._currentRealm.evaluate(text, this._proxyObject);
     } catch (err) {
       this.error(err);
     }
@@ -190,10 +190,8 @@ export default class GemFrame extends GemElement {
     this._clean();
   }
 
-  attributeChanged(name: string) {
+  attributeChanged() {
     this._clean();
-    if (name === 'src') {
-      this._initFrame();
-    }
+    this._initFrame();
   }
 }

@@ -2,6 +2,8 @@ import { generateProxy } from '../utils';
 
 import GemFrame from '../index';
 
+import { getLocation } from './location';
+
 const allowListenerEvent = ['visibilitychange'];
 
 export function getDocument(frameElement: GemFrame) {
@@ -19,6 +21,7 @@ export function getDocument(frameElement: GemFrame) {
   };
 
   let documentProxy: any;
+  const locationProxy = getLocation(frameElement);
 
   const allowWriteDocument = {
     cookie: true,
@@ -37,7 +40,7 @@ export function getDocument(frameElement: GemFrame) {
     },
     domain: document.domain,
     referrer: document.referrer,
-    location,
+    location: locationProxy,
     get getSelection() {
       return frameElement.shadowRoot.getSelection;
     },

@@ -9,7 +9,6 @@
 import GemFrame from '../index';
 
 import { getWindow } from './window';
-import { getDocument } from './document';
 
 // React 事件系统使用 `ownerDocument` 监听事件，无法拦截
 // 导致 `Event.target` 错误
@@ -23,14 +22,14 @@ Object.defineProperty(Event.prototype, 'target', {
 
 export function getGlobalObject(frameElement: GemFrame) {
   const { allowReadWindow, globalProxy } = getWindow(frameElement);
-  const documentProxy = getDocument(frameElement);
 
   return Object.assign(allowReadWindow, {
-    document: documentProxy,
     window: globalProxy,
     global: globalProxy, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
     globalThis: globalProxy,
     self: globalProxy,
+    parent: parent === window ? globalProxy : parent,
+    top: top === window ? globalProxy : top,
     ...frameElement.context,
   });
 }

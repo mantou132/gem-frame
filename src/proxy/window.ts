@@ -1,15 +1,23 @@
 import { generateProxy } from '../utils';
-
 import GemFrame from '../index';
+
+import { getDocument } from './document';
+import { getHistory } from './history';
 
 const allowListenerEvent = ['popstate', 'hashchange'];
 
 export function getWindow(frameElement: GemFrame) {
+  const documentProxy = getDocument(frameElement);
+  const historyProxy = getHistory(frameElement);
+
   const allowWriteWindow = {
     __litHtml: true,
   };
 
   const allowReadWindow = {
+    document: documentProxy,
+    history: historyProxy,
+    location: documentProxy.location,
     // common
     scrollTo: frameElement.scrollTo.bind(frameElement),
     top,
@@ -93,10 +101,8 @@ export function getWindow(frameElement: GemFrame) {
     customElements,
     CustomEvent,
     Node,
-    location,
     localStorage,
     sessionStorage,
-    history,
     addEventListener: (type: string, callback: Function, options: any) => {
       if (['load', 'DOMContentLoaded'].includes(type)) {
         // 未考虑 `removeEventListener`
