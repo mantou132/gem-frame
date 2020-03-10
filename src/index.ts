@@ -6,8 +6,6 @@ import Realm from 'realms-shim';
 
 import { getGlobalObject } from './proxy';
 
-const tagFrameMap: Record<string, GemFrame> = {};
-
 // 由于 js 的问题导致不兼容 Safari
 // 所以这里重新使用 constructor stylesheet，以便子应用操作 `ShadowDOM`
 // 但是优先级比 `<style>` 高
@@ -25,7 +23,6 @@ const frameStyle = createCSSSheet(css`
  * @custom-element gem-frame
  * @prop context
  * @attr src
- * @attr tag
  * @attr basepath
  * @fires error
  * @fires unload
@@ -35,8 +32,6 @@ const frameStyle = createCSSSheet(css`
 export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
-  // 自定义元素标签，只适用于单元素 app
-  @attribute tag: string;
   @attribute basepath: string;
   // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
@@ -67,28 +62,16 @@ export default class GemFrame extends GemElement {
     if (!this.src) return;
 
     console.time(this._shape);
-    if (this.tag && customElements.get(this.tag)) {
-      if (tagFrameMap[this.tag] === this) {
-        const app = document.createElement(this.tag) as GemElement;
-        render(app, this.shadowRoot);
-      } else {
-        this.replaceWith(tagFrameMap[this.tag]);
+    try {
+      this._currentRealm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
+      this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
+      this._proxyObject = getGlobalObject(this);
+      for await (let text of await this._fetchScript()) {
+        this._execScript(text);
       }
-    } else {
-      try {
-        this._currentRealm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
-        // 是自定义元素时 `<iframe>` 不能移除，chrome bug?
-        if (!this.tag || tagFrameMap[this.tag]) {
-          this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
-        }
-        this._proxyObject = getGlobalObject(this);
-        this._execScript(await this._fetchScript());
-      } catch {}
-    }
+    } catch {}
     this._loaded = true;
     console.timeEnd(this._shape);
-    // 初次执行自定义元素记录绑定的 `<gem-frame>`
-    if (this.tag && !(this.tag in tagFrameMap)) tagFrameMap[this.tag] = this;
   };
 
   _fetchScript = async () => {
@@ -106,15 +89,23 @@ export default class GemFrame extends GemElement {
       src = this.src;
     } else {
       // html
-      // TODO：允许多个脚本
       const text = await (await fetch(`${src}?t=${Date.now()}`)).text();
       const parse = new DOMParser();
       doc = parse.parseFromString(text, 'text/html');
       const elements = doc.querySelectorAll('body > *:not(script)');
-      this.shadowRoot.append(...elements);
-      const script: HTMLScriptElement = doc.querySelector('script[src]');
-      const { pathname, search } = new URL(script.src);
-      src = new URL(`${pathname}${search}`, url).toString();
+      this.shadowRoot.append(...[...elements].map(e => e.cloneNode(true)));
+      const scripts = doc.querySelectorAll('script');
+      return [...scripts]
+        .sort(script => (script.defer ? 1 : -1))
+        .map(async script => {
+          if (script.src) {
+            const { pathname, search } = new URL(script.src);
+            const src = new URL(`${pathname}${search}`, url).toString();
+            return await (await fetch(src)).text();
+          } else {
+            return script.textContent;
+          }
+        });
     }
     if (!src) return; // 静默失败
     return await (await fetch(src)).text();

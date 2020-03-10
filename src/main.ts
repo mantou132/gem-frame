@@ -21,11 +21,9 @@ render(
       }
     </style>
     <h1>React App</h1>
-    <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/react/"></gem-frame>
+    <gem-frame basepath="/r" @error=${errorHandle} src="https://gem-microfe.netlify.com/react/"></gem-frame>
     <h1>Vue App</h1>
-    <gem-frame @error=${errorHandle} src="https://gem-microfe.netlify.com/vue/"></gem-frame>
-    <h1>Gem App</h1>
-    <gem-frame tag="app-a-root" @error=${errorHandle} src="https://gem-microfe.netlify.com/app/"></gem-frame>
+    <gem-frame basepath="/v" @error=${errorHandle} src="https://gem-microfe.netlify.com/vue/"></gem-frame>
   `,
   document.body,
 );
