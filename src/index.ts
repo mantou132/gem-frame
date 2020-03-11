@@ -4,7 +4,11 @@ import { createCSSSheet, css } from '@mantou/gem/lib/utils';
 
 import Realm from 'realms-shim';
 
+import urlChangeTarget from './url-change-hack';
 import { getGlobalObject } from './proxy';
+
+const keepAliveFrame: Record<string, GemFrame> = {};
+const callbackWeakMap = new WeakMap<Function, Function>();
 
 // 由于 js 的问题导致不兼容 Safari
 // 所以这里重新使用 constructor stylesheet，以便子应用操作 `ShadowDOM`
@@ -24,6 +28,7 @@ const frameStyle = createCSSSheet(css`
  * @prop context
  * @attr src
  * @attr basepath
+ * @attr {'on' | 'off'} keep-alive
  * @fires error
  * @fires unload
  * @fires load
@@ -34,10 +39,13 @@ export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
   @attribute basepath: string;
+  @attribute keepAlive: 'on' | 'off';
   // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
   @emitter unload: Function;
   @emitter load: Function;
+  // 用于执行 frame 内回调
+  @emitter hostUrlChanged: Function;
   // 共享到子 app 的对象
   @property context: object = {};
 
@@ -50,7 +58,21 @@ export default class GemFrame extends GemElement {
     return new URL(src, location.origin);
   }
 
+  get _key() {
+    return `${this.src}/${this.basepath}`;
+  }
+
+  get _keepAliveFrame() {
+    return keepAliveFrame[this._key];
+  }
+
+  set _keepAliveFrame(v: GemFrame) {
+    keepAliveFrame[this._key] = v;
+  }
+
+  _keepAlive = false;
   _loaded = false;
+  _active = false;
   _currentRealm = null;
   _currentRealmIFrameElement: HTMLIFrameElement = null;
   _proxyObject = null;
@@ -63,21 +85,42 @@ export default class GemFrame extends GemElement {
     if (this._loaded) return;
     if (!this.src) return;
 
-    console.time(this._shape);
-    try {
-      const realm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
-      this._currentRealm = realm;
-      this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
-      this._proxyObject = getGlobalObject(this);
-      for await (let text of await this._fetchScript()) {
-        if (realm === this._currentRealm) {
-          this._execScript(text);
-        }
+    if (this.keepAlive === 'on') {
+      if (!this._keepAliveFrame) {
+        const app = new GemFrame();
+        app._keepAlive = true;
+        app.basepath = this.basepath;
+        app.src = this.src;
+        app.context = this.context;
+        app.error = this.error;
+        app.unload = this.unload;
+        app.load = this.load;
+        app.setAttribute('style', 'height: 100%;');
+        this._keepAliveFrame = app;
+        this.shadowRoot.append(this._keepAliveFrame);
+      } else {
+        console.time(this._keepAliveFrame._shape);
+        this.shadowRoot.append(this._keepAliveFrame);
+        this._keepAliveFrame.hostUrlChanged();
+        console.timeEnd(this._keepAliveFrame._shape);
       }
-    } catch {}
+    } else {
+      console.time(this._shape);
+      try {
+        const realm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
+        this._currentRealm = realm;
+        this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
+        this._proxyObject = getGlobalObject(this);
+        for await (let text of await this._fetchScript()) {
+          if (realm === this._currentRealm) {
+            this._execScript(text);
+          }
+        }
+      } catch {}
+      console.timeEnd(this._shape);
+    }
     this._loaded = true;
     this.load();
-    console.timeEnd(this._shape);
   };
 
   _fetchScript = async () => {
@@ -126,25 +169,13 @@ export default class GemFrame extends GemElement {
   };
 
   _eventListenerList: [EventTarget, string, any, boolean | AddEventListenerOptions][] = [];
-
-  _addProxyEventListener = (
+  _getEventListenerIndex = (
     target: EventTarget,
     event: string,
     callback: any,
     options: boolean | AddEventListenerOptions,
   ) => {
-    target.addEventListener(event, callback, options);
-    this._eventListenerList.push([target, event, callback, options]);
-  };
-
-  _removeProxyEventListener = (
-    target: EventTarget,
-    event: string,
-    callback: any,
-    options: boolean | AddEventListenerOptions,
-  ) => {
-    target.removeEventListener(event, callback, options);
-    const index = this._eventListenerList.findIndex(([_target, _event, _callback, _options]) => {
+    return this._eventListenerList.findIndex(([_target, _event, _callback, _options]) => {
       return (
         target === _target &&
         event === _event &&
@@ -156,6 +187,34 @@ export default class GemFrame extends GemElement {
           : options === _options)
       );
     });
+  };
+
+  _addProxyEventListener = (
+    target: EventTarget,
+    event: string,
+    callback: any,
+    options: boolean | AddEventListenerOptions,
+  ) => {
+    const fn = (e: Event) => {
+      if (!this._active) return;
+      return callback(e);
+    };
+    callbackWeakMap.set(callback, fn);
+    target.addEventListener(event, fn, options);
+    const index = this._getEventListenerIndex(target, event, callback, options);
+    if (index !== -1) return;
+    this._eventListenerList.push([target, event, callback, options]);
+  };
+
+  _removeProxyEventListener = (
+    target: EventTarget,
+    event: string,
+    callback: any,
+    options: boolean | AddEventListenerOptions,
+  ) => {
+    const fn = callbackWeakMap.get(callback) as any;
+    target.removeEventListener(event, fn, options);
+    const index = this._getEventListenerIndex(target, event, callback, options);
     if (index !== -1) this._eventListenerList.splice(index, 1);
   };
 
@@ -177,6 +236,8 @@ export default class GemFrame extends GemElement {
   };
 
   mounted() {
+    urlChangeTarget.addEventListener('change', this.hostUrlChanged as any);
+    this._active = true;
     new IntersectionObserver(entries => {
       if (entries[0].intersectionRatio <= 0) return;
       this._initFrame();
@@ -184,6 +245,9 @@ export default class GemFrame extends GemElement {
   }
 
   unmounted() {
+    urlChangeTarget.removeEventListener('change', this.hostUrlChanged as any);
+    this._active = false;
+    if (this._keepAlive) return;
     this._clean();
   }
 

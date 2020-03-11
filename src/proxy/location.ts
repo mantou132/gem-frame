@@ -14,13 +14,13 @@ export function getLocation(frameElement: GemFrame) {
       return this.href;
     },
     replace(s: string) {
-      location.replace(s);
+      // location.replace(s);
     },
     reload(s: boolean) {
       location.reload(s);
     },
     assign(s: string) {
-      location.assign(s);
+      // location.assign(s);
     },
     get host() {
       return location.host;

@@ -21,7 +21,12 @@ render(
       }
     </style>
     <h1>React App</h1>
-    <gem-frame basepath="/r" @error=${errorHandle} src="https://gem-microfe.netlify.com/react/"></gem-frame>
+    <gem-frame
+      keep-alive="on"
+      basepath="/r"
+      @error=${errorHandle}
+      src="https://gem-microfe.netlify.com/react/"
+    ></gem-frame>
     <h1>Vue App</h1>
     <gem-frame basepath="/v" @error=${errorHandle} src="https://gem-microfe.netlify.com/vue/"></gem-frame>
   `,
