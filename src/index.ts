@@ -1,4 +1,4 @@
-import { GemElement, render, html } from '@mantou/gem/lib/element';
+import { GemElement } from '@mantou/gem/lib/element';
 import { attribute, customElement, emitter, property, adoptedStyle } from '@mantou/gem/lib/decorators';
 import { createCSSSheet, css } from '@mantou/gem/lib/utils';
 
@@ -63,11 +63,14 @@ export default class GemFrame extends GemElement {
 
     console.time(this._shape);
     try {
-      this._currentRealm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
+      const realm = Realm.makeRootRealm({ errorHandler: this._errorEventHandler });
+      this._currentRealm = realm;
       this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
       this._proxyObject = getGlobalObject(this);
       for await (let text of await this._fetchScript()) {
-        this._execScript(text);
+        if (realm === this._currentRealm) {
+          this._execScript(text);
+        }
       }
     } catch {}
     this._loaded = true;
@@ -157,7 +160,7 @@ export default class GemFrame extends GemElement {
     // 模拟子 app window unload 事件
     this.unload();
     // 清空 DOM 内容
-    render(html``, this.shadowRoot);
+    this.shadowRoot.innerHTML = '';
     // 清除 `<gem-frame>` 以及 `window`, `document` 上的事件监听器
     this._eventListenerList.forEach(([target, event, callback, options]) => {
       target.removeEventListener(event, callback, options);
