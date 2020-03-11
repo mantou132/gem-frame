@@ -26,6 +26,7 @@ const frameStyle = createCSSSheet(css`
  * @attr basepath
  * @fires error
  * @fires unload
+ * @fires load
  */
 @customElement('gem-frame')
 @adoptedStyle(frameStyle)
@@ -36,6 +37,7 @@ export default class GemFrame extends GemElement {
   // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
   @emitter unload: Function;
+  @emitter load: Function;
   // 共享到子 app 的对象
   @property context: object = {};
 
@@ -74,6 +76,7 @@ export default class GemFrame extends GemElement {
       }
     } catch {}
     this._loaded = true;
+    this.load();
     console.timeEnd(this._shape);
   };
 
