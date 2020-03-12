@@ -1,0 +1,82 @@
+{
+  "title": "<gem-frame>",
+  "github": "https://github.com/mantou132/gem-frame",
+  "sourceDir": "docs",
+  "sourceBranch": "master",
+  "sidebar": [
+    {
+      "title": "<gem-frame> 是什么",
+      "link": "/001-what",
+      "children": [
+        {
+          "title": "工作方式",
+          "link": "#工作方式"
+        },
+        {
+          "title": "应用场景",
+          "link": "#应用场景"
+        },
+        {
+          "title": "使用方式",
+          "link": "#使用方式"
+        }
+      ]
+    },
+    {
+      "title": "限制",
+      "link": "/002-limit",
+      "children": [
+        {
+          "title": "SOA",
+          "link": "#soa"
+        },
+        {
+          "title": "Custom Element",
+          "link": "#custom-element"
+        },
+        {
+          "title": "JavaScript",
+          "link": "#javascript"
+        },
+        {
+          "title": "DOM",
+          "link": "#dom"
+        },
+        {
+          "title": "CSS",
+          "link": "#css"
+        },
+        {
+          "title": "第三方库",
+          "link": "#第三方库"
+        }
+      ]
+    },
+    {
+      "title": "进阶",
+      "link": "/003-advance",
+      "children": [
+        {
+          "title": "错误处理",
+          "link": "#错误处理"
+        },
+        {
+          "title": "共享数据",
+          "link": "#共享数据"
+        },
+        {
+          "title": "生命周期",
+          "link": "#生命周期"
+        },
+        {
+          "title": "URL 和视图同步",
+          "link": "#url-和视图同步"
+        },
+        {
+          "title": "性能优化",
+          "link": "#性能优化"
+        }
+      ]
+    }
+  ]
+}

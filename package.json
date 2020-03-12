@@ -8,8 +8,21 @@
     "start": "webpack-dev-server --open",
     "build": "webpack"
   },
-  "author": "王先硚",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mantou132/gem-frame.git"
+  },
+  "keywords": [
+    "custom-element",
+    "iframe",
+    "micro-frontend"
+  ],
+  "author": "mantou132",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mantou132/gem-frame/issues"
+  },
+  "homepage": "https://github.com/mantou132/gem-frame#readme",
   "dependencies": {
     "@mantou/gem": "^0.3.18",
     "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
