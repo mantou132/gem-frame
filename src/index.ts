@@ -148,8 +148,9 @@ export default class GemFrame extends GemElement {
         .sort(script => (script.defer ? 1 : -1))
         .map(async script => {
           if (script.src) {
+            const srcAttr = script.getAttribute('src');
             const { pathname, search } = new URL(script.src);
-            const src = new URL(`${pathname}${search}`, url).toString();
+            const src = new URL(`${pathname}${search}`, srcAttr.match(/^(https?:)?\/\//) ? script.src : url).toString();
             return await (await fetch(src)).text();
           } else {
             return script.textContent;
