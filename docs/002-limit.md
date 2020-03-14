@@ -56,7 +56,7 @@ body,
 
 _目前 `:host` 下面的原生 CSS 规则还需要添加 `!important`，当然可以改用你的容器元素的选择器_
 
-另外要慎重使用这些 CSS 单位：`rem`, `vw`, `vh`, `vmax`, `vmin`
+另外要慎重使用这些 CSS 单位：`rem`, `vw`, `vh`, `vmax`, `vmin` 以及 [`@media`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media)
 
 ## 第三方库
 
