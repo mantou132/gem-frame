@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/mantou132/gem-frame#readme",
   "dependencies": {
-    "@mantou/gem": "^0.3.18",
+    "@mantou/gem": "^0.4.1",
     "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
   },
   "devDependencies": {
@@ -32,22 +32,22 @@
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
     "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^5.0.4",
+    "copy-webpack-plugin": "^5.1.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
-    "html-webpack-plugin": "^4.0.0-beta.5",
+    "html-webpack-plugin": "^4.0.0-beta.14",
     "husky": "^2.7.0",
     "lint-staged": "^8.2.1",
-    "preload-webpack-plugin": "^3.0.0-beta.3",
+    "preload-webpack-plugin": "^3.0.0-beta.4",
     "prettier": "^1.19.1",
-    "ts-loader": "^6.0.4",
+    "ts-loader": "^6.2.1",
     "typescript": "^3.8.3",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^3.7.2",
-    "webpack-manifest-plugin": "^2.0.4"
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
+    "webpack-manifest-plugin": "^2.2.0"
   },
   "husky": {
     "hooks": {

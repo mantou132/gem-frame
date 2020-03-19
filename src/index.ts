@@ -83,6 +83,7 @@ export default class GemFrame extends GemElement {
 
   _initFrame = async () => {
     if (this._loaded) return;
+    this._loaded = true;
     if (!this.src) return;
 
     if (this.keepAlive === 'on') {
@@ -119,7 +120,6 @@ export default class GemFrame extends GemElement {
       } catch {}
       console.timeEnd(this._shape);
     }
-    this._loaded = true;
     this.load();
   };
 
@@ -220,6 +220,7 @@ export default class GemFrame extends GemElement {
   };
 
   _clean = () => {
+    if (this._keepAlive) return;
     // 模拟子 app window unload 事件
     this.unload();
     // 清空 DOM 内容
@@ -239,21 +240,22 @@ export default class GemFrame extends GemElement {
   mounted() {
     urlChangeTarget.addEventListener('change', this.hostUrlChanged as any);
     this._active = true;
+
+    // lazy loading
     new IntersectionObserver(entries => {
       if (entries[0].intersectionRatio <= 0) return;
       this._initFrame();
     }).observe(this);
   }
 
+  updated() {
+    this._clean();
+    this._initFrame();
+  }
+
   unmounted() {
     urlChangeTarget.removeEventListener('change', this.hostUrlChanged as any);
     this._active = false;
-    if (this._keepAlive) return;
     this._clean();
-  }
-
-  attributeChanged() {
-    this._clean();
-    this._initFrame();
   }
 }

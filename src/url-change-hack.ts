@@ -1,5 +1,4 @@
 const pushState = history.pushState.bind(history);
-const push = history.push?.bind?.(history);
 
 const target = new EventTarget();
 
@@ -11,16 +10,6 @@ function fireChangeEvent() {
 }
 
 Object.defineProperties(history, {
-  push: push
-    ? {
-        // gem
-        configurable: true,
-        value(...rest: any[]) {
-          fireChangeEvent();
-          push(...rest);
-        },
-      }
-    : undefined,
   pushState: {
     configurable: true,
     value(...rest: any[]) {

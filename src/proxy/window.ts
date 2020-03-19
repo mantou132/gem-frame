@@ -10,9 +10,7 @@ export function getWindow(frameElement: GemFrame) {
   const documentProxy = getDocument(frameElement);
   const historyProxy = getHistory(frameElement);
 
-  const allowWriteWindow = {
-    __litHtml: true,
-  };
+  const allowWriteWindow = {};
 
   const allowReadWindow = {
     document: documentProxy,
