@@ -119,8 +119,8 @@ export default class GemFrame extends GemElement {
         }
       } catch {}
       console.timeEnd(this._shape);
+      this.load();
     }
-    this.load();
   };
 
   _fetchScript = async () => {
