@@ -237,6 +237,10 @@ export default class GemFrame extends GemElement {
     this._loaded = false;
   };
 
+  render() {
+    return undefined;
+  }
+
   mounted() {
     urlChangeTarget.addEventListener('change', this.hostUrlChanged as any);
     this._active = true;
