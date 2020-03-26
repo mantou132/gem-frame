@@ -38,7 +38,9 @@ const frameStyle = createCSSSheet(css`
 export default class GemFrame extends GemElement {
   // 资源路径，支持 html, json, js
   @attribute src: string;
+  // GemApp 不允许设置 basepath
   @attribute basepath: string;
+  // GemApp 必须开启 keepAlive
   @attribute keepAlive: 'on' | 'off';
   // 执行时发生错误, `event.detail` 获取该错误对象
   @emitter error: Function;
@@ -58,10 +60,12 @@ export default class GemFrame extends GemElement {
     return new URL(src, window.location.origin);
   }
 
+  // 用来标记 content
   get _key() {
     return `${this.src}/${this.basepath}`;
   }
 
+  // keepAlive 开启时展示内容的实际 gem-frame 元素
   get _keepAliveFrame() {
     return keepAliveFrame[this._key];
   }
@@ -70,11 +74,17 @@ export default class GemFrame extends GemElement {
     keepAliveFrame[this._key] = v;
   }
 
+  // 标记当前元素是否是 keepAlive 开启时保存的实际 gem-frame 元素
   _keepAlive = false;
+  // 内容是否已经加载
   _loaded = false;
+  // 元素是否时活动的，keepAlive 开启时，元素卸载其值变为 true
   _active = false;
+  // 当前执行脚本的 Realm
   _currentRealm = null;
+  // Reaml 中用到的 iframe 元素
   _currentRealmIFrameElement: HTMLIFrameElement = null;
+  // 当前执行脚本的代理（沙箱）对象
   _proxyObject = null;
 
   _errorEventHandler = ({ error }: ErrorEvent) => {
@@ -162,8 +172,9 @@ export default class GemFrame extends GemElement {
   };
 
   _execScript = (text: string) => {
+    const frame = this._keepAliveFrame || this;
     try {
-      return this._currentRealm.evaluate(text, this._proxyObject);
+      return frame._currentRealm.evaluate(text, frame._proxyObject);
     } catch (err) {
       this.error(err);
     }
@@ -237,6 +248,7 @@ export default class GemFrame extends GemElement {
     this._loaded = false;
   };
 
+  // 防止删除非 lit-html 插入的内容
   render() {
     return undefined;
   }

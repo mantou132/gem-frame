@@ -5,8 +5,8 @@
   "sourceBranch": "master",
   "sidebar": [
     {
-      "title": "<gem-frame> 是什么",
-      "link": "/001-what",
+      "title": "介绍",
+      "link": "/",
       "children": [
         {
           "title": "工作方式",
@@ -27,8 +27,8 @@
       "link": "/002-limit",
       "children": [
         {
-          "title": "SOA",
-          "link": "#soa"
+          "title": "SOP",
+          "link": "#sop"
         },
         {
           "title": "Custom Element",
@@ -75,6 +75,20 @@
         {
           "title": "性能优化",
           "link": "#性能优化"
+        }
+      ]
+    },
+    {
+      "title": "API",
+      "link": "/004-api",
+      "children": [
+        {
+          "title": "宿主环境",
+          "link": "#宿主环境"
+        },
+        {
+          "title": "子应用环境",
+          "link": "#子应用环境"
         }
       ]
     }

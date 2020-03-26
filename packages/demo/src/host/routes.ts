@@ -27,15 +27,8 @@ export default [
     title: '页面 A',
     pattern: '/a/*',
     path: '/a/a', // 给 <link> 用的
-    // 不能使用 basepath，因为 history 共用
-    // 必须使用 keep-alive，因为不能重复定义自定义元素
     content: html`
-      <gem-frame
-        keep-alive="on"
-        src=/app/
-        .context=${context}
-        @error=${console.log}
-      ></gem-frame>
+      <gem-frame keep-alive="on" src="/app/" .context=${context} @error=${console.log}></gem-frame>
     `,
   },
   {
@@ -43,13 +36,7 @@ export default [
     pattern: '/r/*',
     path: '/r', // 给 <link> 用的
     content: html`
-      <gem-frame
-        keep-alive="on"
-        basepath="/r"
-        src=/react/
-        .context=${context}
-        @error=${console.log}
-      ></gem-frame>
+      <gem-frame keep-alive="on" basepath="/r" src="/react/" .context=${context} @error=${console.log}></gem-frame>
     `,
   },
   {
@@ -57,13 +44,7 @@ export default [
     pattern: '/v/*',
     path: '/v', // 给 <link> 用的
     content: html`
-      <gem-frame
-        keep-alive="on"
-        basepath="/v"
-        src=/vue/
-        .context=${context}
-        @error=${console.log}
-      ></gem-frame>
+      <gem-frame keep-alive="on" basepath="/v" src="/vue/" .context=${context} @error=${console.log}></gem-frame>
     `,
   },
   {

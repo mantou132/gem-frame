@@ -1,3 +1,6 @@
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/History
+ */
 import { generateProxy, getAbsolutePath } from '../utils';
 
 import GemFrame from '../index';

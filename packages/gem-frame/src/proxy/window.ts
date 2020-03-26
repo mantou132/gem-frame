@@ -1,3 +1,6 @@
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window
+ */
 import { generateProxy } from '../utils';
 import GemFrame from '../index';
 
@@ -18,7 +21,6 @@ export function getWindow(frameElement: GemFrame) {
     location: documentProxy.location,
     // common
     scrollTo: frameElement.scrollTo.bind(frameElement),
-    top: window.top,
     console,
     caches,
     Headers,
@@ -82,14 +84,10 @@ export function getWindow(frameElement: GemFrame) {
     postMessage: (data: any) => {
       frameElement.dispatchEvent(new MessageEvent('message', { data }));
     },
-    parent: {
-      postMessage: (data: any) => {
-        window.dispatchEvent(new MessageEvent('message', { data }));
-      },
-    },
     prompt: prompt.bind(window),
     // gem
     Image,
+    Audio,
     DOMParser,
     HTMLElement,
     HTMLIFrameElement,

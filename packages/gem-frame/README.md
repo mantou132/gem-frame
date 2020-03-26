@@ -3,5 +3,5 @@
 ## usege
 
 ```js
-html`<gem-frame src="your.website"></gem-frame>`
+html`<gem-frame src="https://your.app.url"></gem-frame>`
 ```
