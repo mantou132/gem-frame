@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "experimentalDecorators": true,
     "sourceMap": true,
     "noImplicitAny": false,
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es6",
-    "lib": ["es2018", "dom", "DOM.Iterable"],
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "lib": ["es2018", "dom", "DOM.Iterable"]
   },
   "include": ["src"]
 }

@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "name": "demo",
+  "version": "0.0.1",
+  "scripts": {
+    "lint": "tsc --noEmit && eslint --ext .ts --fix src/",
+    "start:host": "NAME=host webpack-dev-server --open",
+    "build:host": "NAME=host webpack --mode production",
+    "start:app": "NAME=app webpack-dev-server --open",
+    "build:app": "NAME=app webpack --mode production",
+    "watch:app": "NAME=app webpack --watch --mode production",
+    "start:react": "NAME=react webpack-dev-server --open",
+    "build:react": "NAME=react webpack --mode production",
+    "watch:react": "NAME=react webpack --watch --mode production",
+    "start:vue": "NAME=vue webpack-dev-server --open",
+    "build:vue": "NAME=vue webpack --mode production",
+    "watch:vue": "NAME=vue webpack --watch --mode production",
+    "start": "rm -rf dist && concurrently npm:watch:app npm:watch:react npm:watch:vue npm:start:host",
+    "build": "rm -rf dist && concurrently npm:build:app npm:build:react npm:build:vue npm:build:host"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mantou/gem": "^0.4.2",
+    "gem-frame": "^0.0.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-router": "^5.1.2",
+    "react-router-dom": "^5.1.2",
+    "vue": "^2.6.11",
+    "vue-router": "^3.1.6"
+  }
+}

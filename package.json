@@ -1,53 +1,39 @@
 {
-  "name": "gem-frame",
-  "version": "0.0.1",
-  "description": "",
-  "main": "src/index.ts",
+  "private": true,
+  "name": "root",
   "scripts": {
-    "lint": "tsc --noEmit && eslint --ext .ts --fix src/",
-    "start": "webpack-dev-server --open",
-    "build": "webpack"
+    "lint": "lerna run lint",
+    "build": "lerna run build",
+    "start:demo": "lerna exec --scope demo -- npm run start",
+    "start:demo:app": "lerna exec --scope demo -- npm run start:app",
+    "start:demo:react": "lerna exec --scope demo -- npm run start:rect",
+    "start:demo:vue": "lerna exec --scope demo -- npm run start:vue"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mantou132/gem-frame.git"
-  },
-  "keywords": [
-    "custom-element",
-    "iframe",
-    "micro-frontend"
-  ],
   "author": "mantou132",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/mantou132/gem-frame/issues"
-  },
-  "homepage": "https://github.com/mantou132/gem-frame#readme",
-  "dependencies": {
-    "@mantou/gem": "^0.4.2",
-    "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
-  },
   "devDependencies": {
     "@types/resize-observer-browser": "^0.1.3",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
-    "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^5.1.1",
+    "concurrently": "^5.1.0",
+    "css-loader": "^3.4.2",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
+    "html-webpack-inject-string-plugin": "^1.0.2",
     "html-webpack-plugin": "^4.0.0-beta.14",
     "husky": "^2.7.0",
+    "lerna": "^3.20.2",
     "lint-staged": "^8.2.1",
-    "preload-webpack-plugin": "^3.0.0-beta.4",
     "prettier": "^1.19.1",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.3",
+    "vue-loader": "^15.9.1",
+    "vue-template-compiler": "^2.6.11",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.10.3",
-    "webpack-manifest-plugin": "^2.2.0"
+    "webpack-dev-server": "^3.10.3"
   },
   "husky": {
     "hooks": {

@@ -1,0 +1,29 @@
+{
+  "name": "gem-frame",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "tsc --noEmit && eslint --ext .ts --fix src/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mantou132/gem-frame.git",
+    "directory": "packages/gem-frame"
+  },
+  "keywords": [
+    "custom-element",
+    "iframe",
+    "micro-frontend"
+  ],
+  "author": "mantou132",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mantou132/gem-frame/issues"
+  },
+  "homepage": "https://github.com/mantou132/gem-frame#readme",
+  "dependencies": {
+    "@mantou/gem": "^0.4.2",
+    "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
+  }
+}

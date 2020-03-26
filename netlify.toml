@@ -1,4 +1,21 @@
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/host/*"
+  to = "/host/index.html"
   status = 200
+[[redirects]]
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200
+[[redirects]]
+  from = "/react/*"
+  to = "/react/index.html"
+  status = 200
+[[redirects]]
+  from = "/*"
+  to = "/host/index.html"
+  status = 200
+[[headers]]
+  # Define which paths this specific [[headers]] block will cover.
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "*"
