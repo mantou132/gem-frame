@@ -6,7 +6,7 @@
 
 Custom element isolation execution to ensure the host environment is safe
 
-## 开发
+## development
 
 ```bash
 lerna bootstrap
