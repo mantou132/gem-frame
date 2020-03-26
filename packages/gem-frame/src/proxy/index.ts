@@ -28,8 +28,8 @@ export function getGlobalObject(frameElement: GemFrame) {
     global: globalProxy, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
     globalThis: globalProxy,
     self: globalProxy,
-    parent: parent === window ? globalProxy : parent,
-    top: top === window ? globalProxy : top,
+    parent: window.parent === window ? globalProxy : window.parent,
+    top: window.top === window ? globalProxy : window.top,
     ...frameElement.context,
   });
 }

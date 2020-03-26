@@ -18,7 +18,7 @@ export function getWindow(frameElement: GemFrame) {
     location: documentProxy.location,
     // common
     scrollTo: frameElement.scrollTo.bind(frameElement),
-    top,
+    top: window.top,
     console,
     caches,
     Headers,
@@ -52,7 +52,7 @@ export function getWindow(frameElement: GemFrame) {
     },
     isSecureContext,
     performance,
-    screen,
+    screen: window.screen,
     visualViewport: window['visualViewport'],
     // https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope#Methods
     atob: atob.bind(window),
@@ -72,13 +72,13 @@ export function getWindow(frameElement: GemFrame) {
     queueMicrotask: queueMicrotask.bind(window),
     // https://developer.mozilla.org/en-US/docs/Web/API/Window#Methods
     alert: alert.bind(window),
-    confirm: confirm.bind(window),
+    confirm: window.confirm.bind(window),
     requestAnimationFrame: requestAnimationFrame.bind(window),
     cancelAnimationFrame: cancelAnimationFrame.bind(window),
     getComputedStyle: getComputedStyle.bind(window),
     getSelection: getSelection.bind(window),
     matchMedia: matchMedia.bind(window),
-    open: open.bind(window),
+    open: window.open.bind(window),
     postMessage: (data: any) => {
       frameElement.dispatchEvent(new MessageEvent('message', { data }));
     },

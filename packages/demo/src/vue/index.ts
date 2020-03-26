@@ -24,6 +24,6 @@ const app = new Vue({
   render: h => h(App),
 }).$mount(document.body.appendChild(document.createElement('div')));
 
-addEventListener('hosturlchanged', () => {
-  app.$router.replace(location.pathname);
+window.addEventListener('hosturlchanged', () => {
+  app.$router.replace(window.location.pathname);
 });

@@ -31,7 +31,8 @@ export function getAbsolutePath(path: string, basePath: string) {
     }
     return path;
   } else {
-    return new URL(path, location.href.endsWith('/') ? location.href : `${location.href}/`).pathname;
+    return new URL(path, window.location.href.endsWith('/') ? window.location.href : `${window.location.href}/`)
+      .pathname;
   }
 }
 

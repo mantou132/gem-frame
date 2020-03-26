@@ -6,11 +6,11 @@ export default function Gem() {
   const [, update] = useState(null);
 
   useEffect(() => {
-    addEventListener('hosturlchanged', () => {
+    window.addEventListener('hosturlchanged', () => {
       update(Date.now());
       link.current.click();
     });
   }, []);
 
-  return <Link to={location.pathname} ref={link} replace style={{ display: 'none' }}></Link>;
+  return <Link to={window.location.pathname} ref={link} replace style={{ display: 'none' }}></Link>;
 }

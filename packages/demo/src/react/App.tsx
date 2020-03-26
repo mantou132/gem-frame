@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Route, Link } from 'react-router-dom';
 
-import Gem from './Gem'
+import Gem from './Gem';
 
 const Home = lazy(() => import('./Home'));
 const About = lazy(() => import('./About'));

@@ -20,7 +20,7 @@ export function getDocument(frameElement: GemFrame) {
     }
   };
 
-  let documentProxy: any;
+  let documentProxy: any = null;
   const locationProxy = getLocation(frameElement);
 
   const allowWriteDocument = {

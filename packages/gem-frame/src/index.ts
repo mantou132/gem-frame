@@ -54,8 +54,8 @@ export default class GemFrame extends GemElement {
   }
 
   get _url() {
-    const src = this.src.startsWith('//') ? `${location.protocol}${this.src}` : this.src;
-    return new URL(src, location.origin);
+    const src = this.src.startsWith('//') ? `${window.location.protocol}${this.src}` : this.src;
+    return new URL(src, window.location.origin);
   }
 
   get _key() {
@@ -112,7 +112,7 @@ export default class GemFrame extends GemElement {
         this._currentRealm = realm;
         this._currentRealmIFrameElement = document.querySelector('body iframe:last-child');
         this._proxyObject = getGlobalObject(this);
-        for await (let text of await this._fetchScript()) {
+        for await (const text of await this._fetchScript()) {
           if (realm === this._currentRealm) {
             this._execScript(text);
           }

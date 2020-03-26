@@ -3,6 +3,7 @@ import { generateProxy, getAbsolutePath } from '../utils';
 import GemFrame from '../index';
 
 const ROOT = '/~root/';
+const history = window.history;
 
 export function getHistory(frameElement: GemFrame) {
   function getPath(path: string) {

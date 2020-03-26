@@ -1,3 +1,4 @@
+const history = window.history;
 const pushState = history.pushState.bind(history);
 
 const target = new EventTarget();

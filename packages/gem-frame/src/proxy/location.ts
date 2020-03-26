@@ -2,6 +2,8 @@ import { generateProxy, getRelativePath } from '../utils';
 
 import GemFrame from '../index';
 
+const location = window.location;
+
 export function getLocation(frameElement: GemFrame) {
   const allowWriteLocation = {
     set href(v: string) {
@@ -13,13 +15,13 @@ export function getLocation(frameElement: GemFrame) {
     toString() {
       return this.href;
     },
-    replace(s: string) {
+    replace(_s: string) {
       // location.replace(s);
     },
     reload(s: boolean) {
       location.reload(s);
     },
-    assign(s: string) {
+    assign(_s: string) {
       // location.assign(s);
     },
     get host() {
