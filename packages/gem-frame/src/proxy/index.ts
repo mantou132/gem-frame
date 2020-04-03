@@ -25,11 +25,12 @@ export function getGlobalObject(frameElement: GemFrame) {
 
   return Object.assign(allowReadWindow, {
     window: globalProxy,
-    global: globalProxy, // webpack dev 下会读取，chrome 会检测类型导致发生错误，类型检测原因不明，有可能是过时标准的问题
     globalThis: globalProxy,
     self: globalProxy,
     parent: window.parent === window ? globalProxy : window.parent,
-    top: window.top === window ? globalProxy : window.top,
+    // `window.top` 在 chrome 中不可配置，不能使用代理进行访问，只能使用 `top` 访问？
+    // top: window.top === window ? globalProxy : window.top,
+    top: window.top,
     ...frameElement.context,
   });
 }

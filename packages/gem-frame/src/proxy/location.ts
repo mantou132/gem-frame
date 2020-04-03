@@ -12,6 +12,9 @@ export function getLocation(frameElement: GemFrame) {
     set href(v: string) {
       location.href = v;
     },
+    set hash(v: string) {
+      location.hash = v;
+    },
   };
 
   const target = {

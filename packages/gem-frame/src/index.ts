@@ -151,8 +151,11 @@ export default class GemFrame extends GemElement {
       const text = await (await fetch(`${src}?t=${Date.now()}`)).text();
       const parse = new DOMParser();
       doc = parse.parseFromString(text, 'text/html');
-      const elements = doc.querySelectorAll('body > *:not(script)');
-      this.shadowRoot.append(...[...elements].map(e => e.cloneNode(true)));
+      // 只支持绝对路径，例如样式表，font，css image
+      // 外部样式会造成闪烁
+      const bodyElements = doc.querySelectorAll('body > *:not(script)');
+      const headElements = doc.querySelectorAll('head > *:not(script)');
+      this.shadowRoot.append(...[...bodyElements, ...headElements].map(e => e.cloneNode(true)));
       const scripts = doc.querySelectorAll('script');
       return [...scripts]
         .sort(script => (script.defer ? 1 : -1))

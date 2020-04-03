@@ -34,7 +34,7 @@ export function getDocument(frameElement: GemFrame) {
 
   const allowReadDocument = {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document
-    documentElement: frameElement.shadowRoot,
+    documentElement: generateProxy(frameElement, frameElement.shadowRoot, {}, {}),
     head: frameElement.shadowRoot,
     body: frameElement.shadowRoot,
     activeElement: null,
@@ -63,6 +63,16 @@ export function getDocument(frameElement: GemFrame) {
     // <gem-use>
     querySelector: frameElement.shadowRoot.querySelector.bind(frameElement.shadowRoot),
     querySelectorAll: frameElement.shadowRoot.querySelectorAll.bind(frameElement.shadowRoot),
+
+    getElementById: frameElement.shadowRoot.getElementById.bind(frameElement.shadowRoot),
+    getElementsByClassName(name: string) {
+      // 类型不匹配
+      return frameElement.shadowRoot.querySelectorAll(`.${name}`);
+    },
+    getElementsByTagName(name: string) {
+      // 类型不匹配
+      return frameElement.shadowRoot.querySelectorAll(name);
+    },
 
     // lit-html
     // lit-html 创建的 script 解析在 template 中，不会执行

@@ -35,7 +35,10 @@ Node.ownerDocument;
 
 ## CSS
 
-`<gem-frame>` 并没有重写你的 CSS 代码，所以有些 CSS 代码将失去作用，例如：
+和 `<iframe>` 不同的是 `<gem-frame>` 并没有独立的 `origin`，
+所以 `<link>` 以及 CSS Image、Font 都需要使用绝对路径，否则可能加载不到正确的资源。
+
+另外，`<gem-frame>` 没有重写你的 CSS 代码，所以有些 CSS 代码将失去作用，例如：
 
 ```css
 html,
@@ -57,6 +60,8 @@ body,
 _目前 `:host` 下面的原生 CSS 规则还需要添加 `!important`，当然可以改用你的容器元素选择器_
 
 另外要慎重使用这些 CSS 单位：`rem`, `vw`, `vh`, `vmax`, `vmin` 以及 [`@media`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media)
+
+如果你使用了类似 [`mini-css-extract-plugin`](https://github.com/webpack-contrib/mini-css-extract-plugin)的插件，你可能看到样式闪烁，避免使用他们而使用内联样式表。
 
 ## 第三方库
 
