@@ -113,6 +113,7 @@ export default class GemFrame extends GemElement {
         console.time(this._keepAliveFrame._shape);
         this.shadowRoot.append(this._keepAliveFrame);
         this._keepAliveFrame.hostUrlChanged();
+        this._keepAliveFrame.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
         console.timeEnd(this._keepAliveFrame._shape);
       }
     } else {
@@ -234,7 +235,10 @@ export default class GemFrame extends GemElement {
   };
 
   _clean = () => {
-    if (this._keepAlive) return;
+    if (this._keepAlive) {
+      this.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
+      return;
+    }
     // 模拟子 app window unload 事件
     this.unload();
     // 清空 DOM 内容

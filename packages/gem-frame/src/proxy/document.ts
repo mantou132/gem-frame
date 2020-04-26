@@ -41,6 +41,9 @@ export function getDocument(frameElement: GemFrame) {
     get hidden() {
       return document.hidden;
     },
+    get visibilityState() {
+      return document.visibilityState;
+    },
     domain: document.domain,
     referrer: document.referrer,
     location: locationProxy,
