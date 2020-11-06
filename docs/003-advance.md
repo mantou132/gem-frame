@@ -22,7 +22,7 @@ _但可以手动根据行号和列号以及 source-map 文件找发生错误的�
 `<gem-frame>` 元素支持 `context` 属性，它将这个对象导入 `<gem-frame>` 内的执行环境，以此进行数据和方法共享。
 
 ```js
-html`<gem-frame .context=${{React: ..., Vue: ...}} ...></gem-frame>`
+html`<gem-frame .context=${{ React, Vue }} ...></gem-frame>`
 ```
 
 ## 生命周期
@@ -31,15 +31,14 @@ html`<gem-frame .context=${{React: ..., Vue: ...}} ...></gem-frame>`
 
 ## URL 和视图同步
 
-在 `<gem-frame>` 中通过 [`History API`](https://developer.mozilla.org/en-US/docs/Web/API/History) 进行的路由跳转，可以自动反应到 URL 栏中，同时 `<gem-frame>` 支持 `bashpath` 属性，以便在 URL 中自动添加一个前缀，
-中心化管理路由。
+在 `<gem-frame>` 中通过 [`History API`](https://developer.mozilla.org/en-US/docs/Web/API/History) 进行的路由跳转，可以自动反应到 URL 栏中，同时 `<gem-frame>` 支持 `basepath` 属性，以便在 URL 中自动添加一段基础路径，中心化管理路由。
 
 ```html
 <gem-frame basepath="/namespace" src="https://your.app.url"></gem-frame>
 ```
 
-但是，宿主环境上的 url 更新并不会自动让 `<gem-frame>` 重新渲染，相应的，它只是向 `<gem-frame>` 内的全局
-对象触发一个事件 `hosturlchange`，你可以自行监听这个事件并更新视图，例如：
+默认情况下，宿主环境上的 url 更新并不会自动让 `<gem-frame>` 中的子应用重新渲染，但是，会向子应用上的全局
+对象触发一个 `hosturlchange` 事件，你可以在子应用中自行监听这个事件并进行更新，例如：
 
 ```js
 const app = new Vue({
@@ -47,6 +46,7 @@ const app = new Vue({
 }).$mount(container);
 
 addEventListener('hosturlchanged', () => {
+  // 触发重新渲染
   app.$router.replace(location.pathname);
 });
 ```
@@ -54,9 +54,9 @@ addEventListener('hosturlchanged', () => {
 
 ## 性能优化
 
-`<gem-frame>` 非常像 `<iframe>`，以至于同样拥有一个 `<iframe>` 的特点——每次加载应用都要重新加载所有资源解析和执行所有代码，尽管可能在不久前就做过同样的事情。
+`<gem-frame>` 非常像 `<iframe>`，以至于同样拥有一个 `<iframe>` 的特点——每次加载应用都要重新加载所有资源解析和执行所有代码，尽管可能在不久前就已经加载执行过。
 
-`<gem-frame>` 支持一个 `keep-alive` 的特性，当你开启这个特性后，`<gem-frame>` 元素就算从文档中移除也不会被真正卸载，当你下次挂载相同的 WebApp 时它会把那个已经被藏起来的真实元素重新插入当前文档，之后会触发 `hosturlchanged` 事件，以便子应用更新视图以匹配 URL。
+`<gem-frame>` 支持一个 `keep-alive` 的特性，当你开启这个特性后，`<gem-frame>` 元素从文档中移除后仍然会保留在内存中，当你下次挂载相同的 WebApp 时会把内存中的元素重新插入当前文档，之后会触发 `hosturlchanged` 事件，以便子应用更新视图以及时匹配 URL。
 
 ```html
 <gem-frame keep-alive="on" src="https://your.app.url"></gem-frame>

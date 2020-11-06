@@ -3,7 +3,7 @@
 `<gem-frame>` 是一个自定义元素，就像 `<iframe>` 一样加载另一个 WebApp，它主要做到了下面几件事情：
 
 * 隔离 CSS
-* 隔离 JS（部分）
+* 隔离 JS
 * 同步 URL
 * 支持 Fixed 布局
 
@@ -27,4 +27,4 @@
 <gem-frame src="https://your.app.url"></gem-frame>
 ```
 
-显然，`<gem-frame>` 不能完全模拟 `<iframe>`，接下来将介绍它的限制。
+虽然看起来和 `<iframe>` 一样使用，但是，`<gem-frame>` 并不能完全代替 `<iframe>`，接下来将介绍它的限制。
