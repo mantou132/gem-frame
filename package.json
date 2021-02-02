@@ -4,7 +4,7 @@
   "scripts": {
     "lint": "lerna run lint",
     "build": "lerna run build",
-    "build:docs": "npx gem-book docs -t Gem-frame --build --plugins raw",
+    "build:docs": "npx gem-book docs -t Gem-frame --build --plugin raw",
     "start:demo": "lerna exec --scope demo -- npm run start",
     "start:demo:app": "lerna exec --scope demo -- npm run start:app",
     "start:demo:react": "lerna exec --scope demo -- npm run start:rect",
