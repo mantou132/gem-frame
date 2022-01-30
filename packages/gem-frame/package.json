@@ -24,6 +24,6 @@
   "homepage": "https://github.com/mantou132/gem-frame#readme",
   "dependencies": {
     "@mantou/gem": "^0.4.2",
-    "realms-shim": "git+https://github.com/mantou132/realms-shim.git"
+    "realms-shim": "mantou132/realms-shim"
   }
 }

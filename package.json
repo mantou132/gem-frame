@@ -8,7 +8,8 @@
     "start:demo": "lerna exec --scope demo -- npm run start",
     "start:demo:app": "lerna exec --scope demo -- npm run start:app",
     "start:demo:react": "lerna exec --scope demo -- npm run start:rect",
-    "start:demo:vue": "lerna exec --scope demo -- npm run start:vue"
+    "start:demo:vue": "lerna exec --scope demo -- npm run start:vue",
+    "prepare": "lerna bootstrap"
   },
   "author": "mantou132",
   "repository": "https://github.com/mantou132/gem-frame",

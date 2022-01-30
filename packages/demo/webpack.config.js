@@ -61,11 +61,11 @@ module.exports = (env, argv) => ({
       inject:
         name === 'host'
           ? `
-      <script src=https://unpkg.com/@mantou/gem/umd.js></script>
-      <script src=https://unpkg.com/react/umd/react.production.min.js></script>
-      <script src=https://unpkg.com/react-dom/umd/react-dom.production.min.js></script>
-      <script src=https://unpkg.com/react-router/umd/react-router.min.js></script>
-      <script src=https://unpkg.com/vue/dist/vue.min.js></script>
+      <script src=https://unpkg.com/@mantou/gem@0.4/umd.js></script>
+      <script src=https://unpkg.com/react@16.12/umd/react.production.min.js></script>
+      <script src=https://unpkg.com/react-dom@16.12/umd/react-dom.production.min.js></script>
+      <script src=https://unpkg.com/react-router@5.1/umd/react-router.min.js></script>
+      <script src=https://unpkg.com/vue@2.6/dist/vue.min.js></script>
       `
           : '',
     }),
