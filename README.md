@@ -1,6 +1,6 @@
 # gem-frame
 
-[Demo](https://gem-frame.netlify.com/)
+[Demo](https://frame-example.gemjs.org/)
 
 ## goal
 

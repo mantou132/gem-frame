@@ -1,14 +1,17 @@
 {
-  "editor.formatOnSave": false,
   "typescript.validate.enable": true,
-  "typescript.format.enable": false,
   "javascript.validate.enable": true,
-  "javascript.format.enable": false,
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "eslint.options": { "ignorePath": ".gitignore" },
-  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[xml]": {
+    "editor.defaultFormatter": null
   },
-  "eslint.enable": true
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  }
 }

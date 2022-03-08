@@ -2,7 +2,6 @@
  * https://developer.mozilla.org/en-US/docs/Web/API/Location
  */
 import { generateProxy, getRelativePath } from '../utils';
-
 import GemFrame from '../index';
 
 const location = window.location;
@@ -24,8 +23,8 @@ export function getLocation(frameElement: GemFrame) {
     replace(_s: string) {
       // location.replace(s);
     },
-    reload(s: boolean) {
-      location.reload(s);
+    reload() {
+      location.reload();
     },
     assign(_s: string) {
       // location.assign(s);

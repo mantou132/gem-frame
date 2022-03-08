@@ -1,16 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useHistory } from 'react-router';
 
-export default function Gem() {
-  const link = useRef(null);
-  const [, update] = useState(null);
+export function Gem() {
+  const history = useHistory();
 
   useEffect(() => {
-    window.addEventListener('hosturlchanged', () => {
-      update(Date.now());
-      link.current.click();
+    addEventListener('hosturlchange', () => {
+      history.replace({ pathname: location.pathname });
     });
   }, []);
 
-  return <Link to={window.location.pathname} ref={link} replace style={{ display: 'none' }}></Link>;
+  return <></>;
 }

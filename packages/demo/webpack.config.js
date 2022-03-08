@@ -1,7 +1,6 @@
 const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackInjectStringPlugin = require('html-webpack-inject-string-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const express = require('express');
 
@@ -40,10 +39,9 @@ module.exports = (env, argv) => ({
     path: path.resolve(__dirname, `dist/${name}`),
   },
   externals:
-    name !== 'host' && argv.mode !== 'production'
-      ? []
-      : [
-          function(context, request, callback) {
+    name !== 'host' && argv.mode === 'production'
+      ? [
+          function(_context, request, callback) {
             if (/^@mantou\/gem*/.test(request)) {
               return callback(null, 'Gem');
             }
@@ -53,24 +51,9 @@ module.exports = (env, argv) => ({
           { 'react-dom': 'ReactDOM' },
           { 'react-router': 'ReactRouter' },
           { vue: 'Vue' },
-        ],
-  plugins: [
-    new HtmlWebpackPlugin(),
-    new HtmlWebpackInjectStringPlugin({
-      search: '</head>',
-      inject:
-        name === 'host'
-          ? `
-      <script src=https://unpkg.com/@mantou/gem@0.4/umd.js></script>
-      <script src=https://unpkg.com/react@16.12/umd/react.production.min.js></script>
-      <script src=https://unpkg.com/react-dom@16.12/umd/react-dom.production.min.js></script>
-      <script src=https://unpkg.com/react-router@5.1/umd/react-router.min.js></script>
-      <script src=https://unpkg.com/vue@2.6/dist/vue.min.js></script>
-      `
-          : '',
-    }),
-    new VueLoaderPlugin(),
-  ],
+        ]
+      : [],
+  plugins: [new HtmlWebpackPlugin(), new VueLoaderPlugin()],
   devServer: {
     headers: {
       'Access-Control-Allow-Origin': '*',

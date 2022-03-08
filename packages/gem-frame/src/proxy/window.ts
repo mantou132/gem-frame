@@ -32,6 +32,7 @@ export function getWindow(frameElement: GemFrame) {
         return new Request(req, init);
       }
     },
+    EventTarget,
     XMLHttpRequest,
     WebSocket,
     EventSource,

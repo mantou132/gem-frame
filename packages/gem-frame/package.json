@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/mantou132/gem-frame#readme",
   "dependencies": {
-    "@mantou/gem": "^0.4.2",
+    "@mantou/gem": "^1.6.0",
     "realms-shim": "mantou132/realms-shim"
   }
 }

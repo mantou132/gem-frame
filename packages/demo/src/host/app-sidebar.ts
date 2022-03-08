@@ -29,7 +29,7 @@ class Sidebar extends GemElement {
         li gem-active-link:hover {
           background: rgba(255, 255, 255, 0.1);
         }
-        li gem-active-link.active {
+        li gem-active-link:where([data-active], :--active) {
           background: rgba(255, 255, 255, 0.2);
         }
       </style>

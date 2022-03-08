@@ -1,8 +1,8 @@
 import { html } from '@mantou/gem';
-
-import { RouteItem } from '@mantou/gem/elements/route';
+import type { RouteItem } from '@mantou/gem/elements/route';
 import '@mantou/gem/elements/title';
 
+// 由于使用自定义元素，所以必须使用全路径
 export default [
   {
     title: '页面 AA',

@@ -21,7 +21,7 @@ class Tabs extends GemElement {
           text-decoration: none;
           color: black;
         }
-        gem-active-link.active {
+        gem-active-link:where([data-active], :--active) {
           border-bottom-color: blue;
         }
       </style>
@@ -34,4 +34,4 @@ class Tabs extends GemElement {
     `;
   }
 }
-customElements.define('app-a-tabs', Tabs);
+customElements.define('a-tabs', Tabs);

@@ -1,10 +1,9 @@
 import { GemElement } from '@mantou/gem/lib/element';
 import { attribute, customElement, emitter, property, adoptedStyle } from '@mantou/gem/lib/decorators';
 import { createCSSSheet, css } from '@mantou/gem/lib/utils';
-
 import Realm from 'realms-shim';
 
-import urlChangeTarget from './url-change-hack';
+import { urlChangeTarget } from './url-change-hack';
 import { getGlobalObject } from './proxy';
 
 const keepAliveFrame: Record<string, GemFrame> = {};
@@ -36,19 +35,19 @@ const frameStyle = createCSSSheet(css`
 @customElement('gem-frame')
 @adoptedStyle(frameStyle)
 export default class GemFrame extends GemElement {
-  // 资源路径，支持 html, json, js
+  /** 资源路径，支持 html, json, js */
   @attribute src: string;
-  // GemApp 不允许设置 basepath
+  /** GemApp 不允许设置 basepath */
   @attribute basepath: string;
-  // GemApp 必须开启 keepAlive
+  /** GemApp 必须开启 keepAlive */
   @attribute keepAlive: 'on' | 'off';
-  // 执行时发生错误, `event.detail` 获取该错误对象
+  /** 执行时发生错误, `event.detail` 获取该错误对象 */
   @emitter error: Function;
   @emitter unload: Function;
   @emitter load: Function;
-  // 用于执行 frame 内回调
-  @emitter hostUrlChanged: Function;
-  // 共享到子 app 的对象
+  /** 用于执行 frame 内回调 */
+  @emitter hosturlchange: Function;
+  /** 共享到子 app 的对象 */
   @property context: object = {};
 
   get _shape() {
@@ -112,7 +111,7 @@ export default class GemFrame extends GemElement {
       } else {
         console.time(this._keepAliveFrame._shape);
         this.shadowRoot.append(this._keepAliveFrame);
-        this._keepAliveFrame.hostUrlChanged();
+        this._keepAliveFrame.hosturlchange();
         this._keepAliveFrame.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
         console.timeEnd(this._keepAliveFrame._shape);
       }
@@ -261,7 +260,7 @@ export default class GemFrame extends GemElement {
   }
 
   mounted() {
-    urlChangeTarget.addEventListener('change', this.hostUrlChanged as any);
+    urlChangeTarget.addEventListener('change', this.hosturlchange as any);
     this._active = true;
 
     // lazy loading
@@ -277,7 +276,7 @@ export default class GemFrame extends GemElement {
   }
 
   unmounted() {
-    urlChangeTarget.removeEventListener('change', this.hostUrlChanged as any);
+    urlChangeTarget.removeEventListener('change', this.hosturlchange as any);
     this._active = false;
     this._clean();
   }

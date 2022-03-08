@@ -9,14 +9,14 @@
 
 ## Custom Element
 
-你不应该在 `<gem-frame>` 加载的应用中定义自定义元素，因为无法保证外部是否已经定义过该元素，
-解决方法是在宿主应用中定义并进行统一自定义元素管理，避免在 `<gem-frame>` 中加载的应用发生自定义元素冲突。
+谨慎在 `<gem-frame>` 加载的应用中定义自定义元素，因为无法保证外部是否已经定义过该元素，
+解决方法是约定命名前缀，避免在 `<gem-frame>` 中加载的应用发生自定义元素冲突。
 
 _未来也许有基于范围的自定义元素，[详情](https://github.com/WICG/webcomponents/issues/716)_
 
 ## JavaScript
 
-- `<gem-frame>` 中的内容执行在一个新的环境中，但由于和宿主环境共享 Document，所以某些关于 DOM 的操作会比较怪异，比如下面这个表达式将返回 `false`：
+- `<gem-frame>` 中的内容执行在一个新的环境中，但由于和宿主环境共享 `Document`，所以某些关于 DOM 的操作会比较怪异，比如下面这个表达式将返回 `false`：
 
   ```js
   document.createElement('div') instanceof Object;
@@ -24,7 +24,7 @@ _未来也许有基于范围的自定义元素，[详情](https://github.com/WIC
 
 - 不能使用 ES Module，如果使用现代前端构建系统如 Webpack 来部署子应用时则不需要担心此问题
 - 由于使用了 `eval` ，所以还要确保宿主应用 [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src) 正确配置
-- 使用 `eval` 可能会有性能上的损失
+- 相比直接执行代码使用 `eval` 可能会有性能上的损失
 
 ## DOM
 
@@ -39,7 +39,7 @@ Node.ownerDocument;
 ## CSS
 
 和 `<iframe>` 不同的是 `<gem-frame>` 并没有独立的 `origin`，
-所以 `<link>` 以及 CSS Image、Font 都需要使用绝对路径，否则可能加载不到正确的资源。
+所以 `<link>` 以及 CSS Image、Font 都需要使用**绝对路径**，否则可能加载不到正确的资源。
 
 另外，`<gem-frame>` 没有重写子应用的 CSS 代码，所以子应用中有些 CSS 代码将失去作用，例如：
 

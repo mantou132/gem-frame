@@ -7,50 +7,30 @@
     "build:docs": "npx gem-book docs -t Gem-frame --build --plugin raw",
     "start:demo": "lerna exec --scope demo -- npm run start",
     "start:demo:app": "lerna exec --scope demo -- npm run start:app",
-    "start:demo:react": "lerna exec --scope demo -- npm run start:rect",
+    "start:demo:react": "lerna exec --scope demo -- npm run start:react",
     "start:demo:vue": "lerna exec --scope demo -- npm run start:vue",
-    "prepare": "lerna bootstrap"
+    "prepare": "husky install && lerna bootstrap"
   },
   "author": "mantou132",
   "repository": "https://github.com/mantou132/gem-frame",
   "license": "ISC",
   "devDependencies": {
-    "@types/react": "^16.9.11",
-    "@types/react-dom": "^16.9.4",
-    "@types/react-router": "^5.1.2",
-    "@types/react-router-dom": "^4.3.5",
-    "@types/resize-observer-browser": "^0.1.3",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
-    "concurrently": "^5.1.0",
-    "css-loader": "^3.4.2",
+    "@typescript-eslint/eslint-plugin": "^4.25.0",
+    "@typescript-eslint/parser": "^4.25.0",
     "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-config-react-app": "^5.2.1",
     "eslint-plugin-flowtype": "^3.13.0",
-    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.1",
-    "html-webpack-inject-string-plugin": "^1.0.2",
-    "html-webpack-plugin": "^4.0.0-beta.14",
-    "husky": "^2.7.0",
+    "husky": "^7.0.1",
     "lerna": "^3.20.2",
-    "lint-staged": "^8.2.1",
+    "lint-staged": "^11.0.0",
     "prettier": "^1.19.1",
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.8.3",
-    "vue-loader": "^15.9.1",
-    "vue-template-compiler": "^2.6.11",
-    "webpack": "^4.42.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.10.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "typescript": "^4.5.0"
   },
   "lint-staged": {
     "*.ts": "eslint --fix"

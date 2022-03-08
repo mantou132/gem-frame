@@ -2,7 +2,6 @@
  * https://developer.mozilla.org/en-US/docs/Web/API/Document
  */
 import { generateProxy } from '../utils';
-
 import GemFrame from '../index';
 
 import { getLocation } from './location';
@@ -47,20 +46,14 @@ export function getDocument(frameElement: GemFrame) {
     domain: document.domain,
     referrer: document.referrer,
     location: locationProxy,
-    get getSelection() {
-      return frameElement.shadowRoot.getSelection;
-    },
     get elementFromPoint() {
       return frameElement.shadowRoot.elementFromPoint;
     },
     get elementsFromPoint() {
       return frameElement.shadowRoot.elementsFromPoint;
     },
-    get caretRangeFromPoint() {
-      return frameElement.shadowRoot.caretRangeFromPoint;
-    },
-    get caretPositionFromPoint() {
-      return frameElement.shadowRoot.caretPositionFromPoint;
+    get getSelection() {
+      return document.getSelection;
     },
 
     // <gem-use>

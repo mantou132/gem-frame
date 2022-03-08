@@ -10,6 +10,7 @@ class Header extends GemElement {
           grid-row: 1/2;
           grid-column: 1/3;
           display: flex;
+          align-items: center;
         }
         .logo {
           font-size: 48px;
